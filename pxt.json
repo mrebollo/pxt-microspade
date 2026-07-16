@@ -7,8 +7,7 @@
     },
     "files": [
         "main.ts",
-        "README.md",
-        "icon.png"
+        "README.md"
     ],
     "testFiles": [
         "test.ts"

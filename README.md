@@ -73,7 +73,7 @@ Para facilitar el aprendizaje, puedes importar proyectos de ejemplo completos en
 
 1.  **Hola Mundo (ms hello world)**: 
     *   Un agente simple ("saludador") que utiliza un comportamiento de tipo *One Shot* para mostrar un saludo en pantalla.
-    *   [Abrir proyecto en MakeCode Blocks](https://makecode.microbit.org/S10623-05005-73085-52255)
+    *   [Abrir proyecto en MakeCode Blocks](https://makecode.microbit.org/S51167-61185-00431-40389)
     *   Código fuente: [examples/hello_world.ts](file:///Users/mrebollo/devel/pxt-microspade/examples/hello_world.ts)
 
 ---
