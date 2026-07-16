@@ -1,7 +1,7 @@
 /**
  * microspade — Agentes inteligentes ligeros para BBC micro:bit
  */
-//% color="#4a90e2" icon="\u2660" block="Microspade" groups='["Agente", "Comportamientos", "Mensajes"]'
+//% color="#4a90e2" icon="\uf0e8" block="Microspade" groups='["Agente", "Comportamientos", "Mensajes"]'
 namespace microspade {
     // Variables de estado del Agente (Singleton)
     export let agentName = "agent";
@@ -368,8 +368,9 @@ namespace microspade {
     //% sender.defl=""
     //% group="Mensajes"
     //% weight=40
-    export function createMessageTemplate(to: string = "", sender: string = "", performative: MessagePerformative = -1): MessageTemplate {
-        return new MessageTemplate(to, sender, performative);
+    export function createMessageTemplate(to: string = "", sender: string = "", performative?: MessagePerformative): MessageTemplate {
+        let perf = (performative === undefined) ? -1 : performative;
+        return new MessageTemplate(to, sender, perf);
     }
 
     /**
