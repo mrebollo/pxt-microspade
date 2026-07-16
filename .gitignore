@@ -10,3 +10,15 @@ _site
 *.tgz
 .header.json
 .simstate.json
+
+# IDE / Assistant configs
+.vscode/
+.agents/
+
+# Package & build artifacts
+package.json
+package-lock.json
+Gemfile
+Gemfile.lock
+Makefile
+_history/
