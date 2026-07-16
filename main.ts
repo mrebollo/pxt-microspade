@@ -32,10 +32,7 @@ namespace microspade {
         if (setupCallback) {
             setupCallback();
         }
-        
-        // Inicializar la radio con un grupo por defecto
-        radio.setGroup(1);
-        
+
         // Registrar el receptor de radio en segundo plano
         radio.onReceivedString(function (receivedString) {
             let msg = Message.decode(receivedString);
@@ -324,13 +321,13 @@ namespace microspade {
 
         public match(msg: Message): boolean {
             if (!msg) return false;
-            
+
             // Comprobación de destinatario (si está definido)
             if (this.to && msg.getTo() !== this.to) return false;
-            
+
             // Comprobación de emisor (si está definido)
             if (this.sender && msg.getSender() !== this.sender) return false;
-            
+
             // Comprobación de performativa: -1 (o undefined en JS) significa "any" / no filtrar
             if (this.performative !== undefined && this.performative !== -1 && msg.getPerformative() !== this.performative) {
                 return false;
