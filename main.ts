@@ -1,7 +1,7 @@
 /**
  * microspade — Agentes inteligentes ligeros para BBC micro:bit
  */
-//% color="#4a90e2" icon="\uf0e8" block="Microspade"
+//% color="#4a90e2" icon="\uf0e8" block="Microspade" groups='["Agente", "Comportamientos", "Mensajes"]'
 namespace microspade {
     // Variables de estado del Agente (Singleton)
     export let agentName = "agent";
@@ -15,6 +15,7 @@ namespace microspade {
     //% blockId="microspade_create_agent"
     //% name.defl="agent"
     //% handlerStatement=true
+    //% group="Agente"
     //% weight=100
     export function createAgent(name: string, handler: () => void): void {
         agentName = name;
@@ -27,6 +28,7 @@ namespace microspade {
      */
     //% block="start agent"
     //% blockId="microspade_start_agent"
+    //% group="Agente"
     //% weight=95
     export function startAgent(): void {
         if (setupCallback) {
@@ -51,9 +53,21 @@ namespace microspade {
      */
     //% block="stop agent"
     //% blockId="microspade_stop_agent"
+    //% group="Agente"
     //% weight=90
     export function stopAgent(): void {
         running = false;
+    }
+
+    /**
+     * Obtiene el nombre del agente actual.
+     */
+    //% block="agent name"
+    //% blockId="microspade_agent_name"
+    //% group="Agente"
+    //% weight=85
+    export function getAgentName(): string {
+        return agentName;
     }
 
     // --- COMPORTAMIENTOS BASADOS EN FIBRAS ---
@@ -63,7 +77,8 @@ namespace microspade {
      */
     //% block="add one shot behaviour"
     //% blockId="microspade_add_oneshot"
-    //% weight=80
+    //% group="Comportamientos"
+    //% weight=70
     export function addOneShotBehaviour(handler: () => void): void {
         control.runInBackground(() => {
             // Espera a que el agente se inicie explícitamente
@@ -79,7 +94,8 @@ namespace microspade {
      */
     //% block="add cyclic behaviour"
     //% blockId="microspade_add_cyclic"
-    //% weight=75
+    //% group="Comportamientos"
+    //% weight=80
     export function addCyclicBehaviour(handler: () => void): void {
         control.runInBackground(() => {
             // Espera a que el agente se inicie explícitamente
@@ -99,7 +115,8 @@ namespace microspade {
     //% block="add periodic behaviour every $periodMs ms"
     //% blockId="microspade_add_periodic"
     //% periodMs.defl=1000
-    //% weight=70
+    //% group="Comportamientos"
+    //% weight=75
     export function addPeriodicBehaviour(periodMs: number, handler: () => void): void {
         control.runInBackground(() => {
             // Espera a que el agente se inicie explícitamente
@@ -119,6 +136,7 @@ namespace microspade {
     //% block="add timeout behaviour after $timeoutMs ms"
     //% blockId="microspade_add_timeout"
     //% timeoutMs.defl=2000
+    //% group="Comportamientos"
     //% weight=65
     export function addTimeoutBehaviour(timeoutMs: number, handler: () => void): void {
         control.runInBackground(() => {
@@ -248,7 +266,8 @@ namespace microspade {
          */
         //% block="make reply from %this with body $replyBody"
         //% blockId="microspade_message_make_reply"
-        //% weight=60
+        //% group="Mensajes"
+        //% weight=35
         public makeReply(replyBody: string): Message {
             return new Message(this.sender, this.to, this.performative, replyBody);
         }
@@ -262,7 +281,8 @@ namespace microspade {
     //% blockSetVariable="message"
     //% to.defl="agent"
     //% performative.defl=MessagePerformative.Inform
-    //% weight=85
+    //% group="Mensajes"
+    //% weight=60
     export function createMessage(to: string, body: string, performative: MessagePerformative = MessagePerformative.Inform): Message {
         return new Message(to, agentName, performative, body);
     }
@@ -272,7 +292,8 @@ namespace microspade {
      */
     //% block="message $field of $message"
     //% blockId="microspade_message_get_field"
-    //% weight=70
+    //% group="Mensajes"
+    //% weight=45
     export function getMessageField(message: Message, field: MessageField): string {
         if (!message) return "";
         return message.getField(field);
@@ -298,7 +319,8 @@ namespace microspade {
      */
     //% block="send message $msg"
     //% blockId="microspade_send_message"
-    //% weight=81
+    //% group="Mensajes"
+    //% weight=55
     export function sendMessage(msg: Message): void {
         if (!msg) return;
         radio.sendString(msg.encode());
@@ -344,7 +366,8 @@ namespace microspade {
     //% blockSetVariable="template"
     //% to.defl=""
     //% sender.defl=""
-    //% weight=60
+    //% group="Mensajes"
+    //% weight=40
     export function createMessageTemplate(to: string = "", sender: string = "", performative: MessagePerformative = -1): MessageTemplate {
         return new MessageTemplate(to, sender, performative);
     }
@@ -355,7 +378,8 @@ namespace microspade {
      */
     //% block="receive message||matching template $template"
     //% blockId="microspade_receive_message"
-    //% weight=80
+    //% group="Mensajes"
+    //% weight=50
     export function receive(template?: MessageTemplate): Message {
         if (_mailbox.length === 0) return null;
 

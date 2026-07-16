@@ -13,7 +13,7 @@ function assert(condition: boolean, message: string) {
 serial.writeLine("Starting microspade Message & Serialization tests...");
 
 // Configurar nombre del agente para el test
-microspade.initAgent("sender_agent");
+microspade.agentName = "sender_agent";
 
 // Test 1: Creación de Mensajes
 let msg = microspade.createMessage("receiver_agent", "hello world", microspade.MessagePerformative.Request);
