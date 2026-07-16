@@ -24,7 +24,7 @@ assert(microspade.getMessageField(msg, microspade.MessageField.Body) === "hello 
 
 // Test 2: Codificación básica
 let raw = msg.encode();
-assert(raw === "receiver_agent|sender_agent|request|hello world", "Encoded string mismatch: " + raw);
+assert(raw === "receiver_agent|sender_agent|1|hello world", "Encoded string mismatch: " + raw);
 
 // Test 3: Decodificación básica
 let decoded = microspade.Message.decode(raw);
@@ -37,7 +37,7 @@ assert(microspade.getMessageField(decoded, microspade.MessageField.Body) === "he
 // Test 4: Codificación con caracteres especiales (escape de |)
 let msgSpecial = microspade.createMessage("receiver_agent", "one|two|three", microspade.MessagePerformative.Inform);
 let rawSpecial = msgSpecial.encode();
-assert(rawSpecial === "receiver_agent|sender_agent|inform|one\\|two\\|three", "Special character encoding failed: " + rawSpecial);
+assert(rawSpecial === "receiver_agent|sender_agent|0|one\\|two\\|three", "Special character encoding failed: " + rawSpecial);
 
 // Test 5: Decodificación con caracteres especiales
 let decodedSpecial = microspade.Message.decode(rawSpecial);
@@ -50,3 +50,34 @@ assert(reply.getSender() === "receiver_agent", "Reply sender should be 'receiver
 assert(reply.getBody() === "got your message", "Reply body should be 'got your message'");
 
 serial.writeLine("All Message & Serialization tests completed successfully!");
+
+// Test 7: Pruebas del Buzón de Entrada y Plantillas de Filtrado
+serial.writeLine("Starting Mailbox & Template tests...");
+
+// Vaciar el buzón si tuviera algo
+while (microspade.receive() !== null) {}
+
+// Crear mensajes de prueba
+let msgInform = microspade.createMessage("pinger", "value: 22", microspade.MessagePerformative.Inform);
+let msgRequest = microspade.createMessage("pinger", "action: turn_on", microspade.MessagePerformative.Request);
+
+// Encolar en el buzón
+microspade.queueMessage(msgInform);
+microspade.queueMessage(msgRequest);
+
+// Test 7.1: Recepción con filtro de tipo (Request)
+let filterRequest = microspade.createMessageTemplate("", "", microspade.MessagePerformative.Request);
+let receivedReq = microspade.receive(filterRequest);
+
+assert(receivedReq !== null, "Should have received a message matching Request filter");
+assert(microspade.getMessageField(receivedReq, microspade.MessageField.Body) === "action: turn_on", "Should match the Request body");
+
+// Test 7.2: Recepción del restante (Inform) sin filtro
+let receivedInf = microspade.receive();
+assert(receivedInf !== null, "Should have received the remaining Inform message");
+assert(microspade.getMessageField(receivedInf, microspade.MessageField.Body) === "value: 22", "Should match the Inform body");
+
+// Test 7.3: Recepción de buzón vacío
+assert(microspade.receive() === null, "Mailbox should be empty now");
+
+serial.writeLine("Mailbox & Template tests completed successfully!");

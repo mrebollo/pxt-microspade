@@ -14,11 +14,11 @@ namespace microspade {
     //% block="create agent $name"
     //% blockId="microspade_create_agent"
     //% name.defl="agent"
-    //% handler.statement=true
+    //% handlerStatement=true
     //% weight=100
-    export function createAgent(name: string, setup: () => void): void {
+    export function createAgent(name: string, handler: () => void): void {
         agentName = name;
-        setupCallback = setup;
+        setupCallback = handler;
         running = false;
     }
 
@@ -32,6 +32,20 @@ namespace microspade {
         if (setupCallback) {
             setupCallback();
         }
+        
+        // Inicializar la radio con un grupo por defecto
+        radio.setGroup(1);
+        
+        // Registrar el receptor de radio en segundo plano
+        radio.onReceivedString(function (receivedString) {
+            let msg = Message.decode(receivedString);
+            if (msg) {
+                if (msg.getTo() === agentName || msg.getTo() === "*") {
+                    queueMessage(msg);
+                }
+            }
+        });
+
         running = true;
     }
 
@@ -202,7 +216,8 @@ namespace microspade {
          */
         public encode(): string {
             let bodyEncoded = this.body ? this.body.split("|").join("\\|") : "";
-            let perfStr = _performativeNames[this.performative] || "inform";
+            // Enviar el índice de la performativa (0-7) para ahorrar espacio por radio (máximo 19 caracteres en v1/simulador)
+            let perfStr = "" + this.performative;
             return (this.to || "") + "|" + (this.sender || "") + "|" + perfStr + "|" + bodyEncoded;
         }
 
@@ -224,8 +239,9 @@ namespace microspade {
             let bodyEncoded = raw.substr(idx3 + 1);
             let body = bodyEncoded.split("\\|").join("|");
 
-            let idx = _performativeNames.indexOf(performativeStr);
-            let performative = idx >= 0 ? idx : MessagePerformative.Inform;
+            // Convertimos el carácter del índice de la performativa de vuelta a su valor numérico
+            let perfCode = performativeStr.charCodeAt(0) - 48; // '0' es 48 en ASCII
+            let performative = (perfCode >= 0 && perfCode <= 7) ? perfCode : MessagePerformative.Inform;
 
             return new Message(to, sender, performative, body);
         }
@@ -261,6 +277,103 @@ namespace microspade {
     //% blockId="microspade_message_get_field"
     //% weight=70
     export function getMessageField(message: Message, field: MessageField): string {
+        if (!message) return "";
         return message.getField(field);
+    }
+
+    // Buzón de entrada de mensajes del Agente (Cola FIFO)
+    let _mailbox: Message[] = [];
+    const MAX_MAILBOX_SIZE = 10;
+
+    /**
+     * Añade manualmente un mensaje al buzón de entrada (útil para pruebas locales).
+     */
+    export function queueMessage(msg: Message): void {
+        if (!msg) return;
+        if (_mailbox.length >= MAX_MAILBOX_SIZE) {
+            _mailbox.shift(); // Elimina el mensaje más antiguo para liberar RAM
+        }
+        _mailbox.push(msg);
+    }
+
+    /**
+     * Envía un mensaje por radio.
+     */
+    //% block="send message $msg"
+    //% blockId="microspade_send_message"
+    //% weight=81
+    export function sendMessage(msg: Message): void {
+        if (!msg) return;
+        radio.sendString(msg.encode());
+    }
+
+    /**
+     * Plantilla para filtrar mensajes del buzón.
+     */
+    //% blockNamespace="microspade" class="MessageTemplate"
+    export class MessageTemplate {
+        public to: string;
+        public sender: string;
+        public performative: MessagePerformative;
+
+        constructor(to: string, sender: string, performative: MessagePerformative) {
+            this.to = to || "";
+            this.sender = sender || "";
+            this.performative = performative;
+        }
+
+        public match(msg: Message): boolean {
+            if (!msg) return false;
+            
+            // Comprobación de destinatario (si está definido)
+            if (this.to && msg.getTo() !== this.to) return false;
+            
+            // Comprobación de emisor (si está definido)
+            if (this.sender && msg.getSender() !== this.sender) return false;
+            
+            // Comprobación de performativa: -1 (o undefined en JS) significa "any" / no filtrar
+            if (this.performative !== undefined && this.performative !== -1 && msg.getPerformative() !== this.performative) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    /**
+     * Crea una plantilla para filtrar mensajes en el buzón.
+     */
+    //% block="template matching||destination $to sender $sender performative $performative"
+    //% blockId="microspade_create_template"
+    //% blockSetVariable="template"
+    //% to.defl=""
+    //% sender.defl=""
+    //% weight=60
+    export function createMessageTemplate(to: string = "", sender: string = "", performative: MessagePerformative = -1): MessageTemplate {
+        return new MessageTemplate(to, sender, performative);
+    }
+
+    /**
+     * Extrae y devuelve el primer mensaje del buzón que coincida con la plantilla (si se especifica).
+     * Devuelve null si no hay ningún mensaje coincidente.
+     */
+    //% block="receive message||matching template $template"
+    //% blockId="microspade_receive_message"
+    //% weight=80
+    export function receive(template?: MessageTemplate): Message {
+        if (_mailbox.length === 0) return null;
+
+        if (!template) {
+            return _mailbox.shift(); // FIFO estándar
+        }
+
+        // Buscar el primer mensaje que coincida con el filtro
+        for (let i = 0; i < _mailbox.length; i++) {
+            if (template.match(_mailbox[i])) {
+                let msg = _mailbox[i];
+                _mailbox.splice(i, 1); // Lo extraemos del buzón
+                return msg;
+            }
+        }
+        return null;
     }
 }
