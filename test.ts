@@ -44,7 +44,7 @@ let decodedSpecial = microspade.Message.decode(rawSpecial);
 assert(microspade.getMessageField(decodedSpecial, microspade.MessageField.Body) === "one|two|three", "Special character decoding failed: " + microspade.getMessageField(decodedSpecial, microspade.MessageField.Body));
 
 // Test 6: Crear respuesta (makeReply)
-let reply = msg.makeReply("got your message");
+let reply = microspade.makeReply(msg, "got your message");
 assert(reply.getTo() === "sender_agent", "Reply destination should be 'sender_agent'");
 assert(reply.getSender() === "receiver_agent", "Reply sender should be 'receiver_agent'");
 assert(reply.getBody() === "got your message", "Reply body should be 'got your message'");

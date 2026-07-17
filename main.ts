@@ -258,16 +258,7 @@ namespace microspade {
             return new Message(to, sender, performative, body);
         }
 
-        /**
-         * Crea un mensaje de respuesta invirtiendo destinatario y emisor.
-         */
-        //% block="make reply to message %this with body $replyBody"
-        //% blockId="microspade_message_make_reply"
-        //% group="Mensajes"
-        //% weight=35
-        public makeReply(replyBody: string): Message {
-            return new Message(this.sender, this.to, this.performative, replyBody);
-        }
+        // La clase Message finaliza de forma limpia
     }
 
     /**
@@ -297,6 +288,22 @@ namespace microspade {
     //% weight=58
     export function createMessageNumber(to: string, body: number, performative: MessagePerformative = MessagePerformative.Inform): Message {
         return new Message(to, agentName, performative, "" + body);
+    }
+
+    /**
+     * Crea un mensaje de respuesta a partir de otro invirtiendo destinatario y emisor.
+     */
+    //% block="make reply to message $message with body $replyBody"
+    //% blockId="microspade_message_make_reply"
+    //% group="Mensajes"
+    //% weight=35
+    export function makeReply(message: Message, replyBody: string): Message {
+        if (!message) return null;
+        // Invertimos destinatario y emisor
+        let to = message.getField(MessageField.Sender);
+        let sender = message.getField(MessageField.To);
+        let perf = message.getPerformative();
+        return new Message(to, sender, perf, replyBody);
     }
 
     /**
