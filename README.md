@@ -118,8 +118,8 @@ microspade.onAgentStart("cli", function () {
     // Inicialización de variables locales del agente si son necesarias
 })
 
-microspade.onMessageReceived(function (received) {
-    let bodyText = microspade.getMessageField(received, microspade.MessageField.Body)
+microspade.onMessageReceived(function (message) {
+    let bodyText = microspade.getMessageField(message, microspade.MessageField.Body)
     basic.showString(bodyText)
 })
 ```
