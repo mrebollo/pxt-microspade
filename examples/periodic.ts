@@ -1,3 +1,4 @@
+let on = false
 microspade.addPeriodicBehaviour(1000, function () {
     if (on) {
         basic.showIcon(IconNames.Diamond)
@@ -6,8 +7,3 @@ microspade.addPeriodicBehaviour(1000, function () {
     }
     on = !(on)
 })
-microspade.createAgent("launcher", function () {
-    on = true
-})
-let on = false
-microspade.startAgent()

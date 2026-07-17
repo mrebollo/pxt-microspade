@@ -168,3 +168,9 @@ Para facilitar el aprendizaje, puedes importar proyectos de ejemplo completos en
 ## Licencia
 
 MIT
+
+<!-- target for local offline docs render -->
+<script src="https://makecode.com/gh-pages-embed.js"></script>
+<script>
+  makeCodeRender("https://makecode.microbit.org/", "mrebollo/pxt-microspade");
+</script>

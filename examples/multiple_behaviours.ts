@@ -1,9 +1,5 @@
-// --- Definición del Agente y sus comportamientos ---
-microspade.createAgent("alarma_seguridad", function () {
-    alerta = false
-    // --- Variables Globales (Estado compartido) ---
-    nivelLuz = 255
-})
+let alerta = false
+let nivelLuz = 0
 input.onButtonPressed(Button.A, function () {
     music.stopAllSounds()
     basic.clearScreen()
@@ -27,7 +23,3 @@ microspade.addPeriodicBehaviour(1000, function () {
         alerta = true
     }
 })
-let nivelLuz = 0
-let alerta = false
-// --- Arranque explícito del Agente ---
-microspade.startAgent()

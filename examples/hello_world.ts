@@ -1,8 +1,7 @@
+let text = ""
+microspade.onAgentStart("agent", function () {
+    text = "pepe"
+})
 microspade.addOneShotBehaviour(function () {
-    basic.showString("Hello " + myname)
+    basic.showString("Hello " + text)
 })
-let myname = ""
-microspade.createAgent(""saludador"", function () {
-    myname = "pepe"
-})
-microspade.startAgent()
