@@ -8,7 +8,7 @@ namespace microspade {
     export let running = true; // El agente arranca activo por defecto
 
     let stopCallback: () => void = null;
-    let messageReceivedHandler: (msg: Message) => void = null;
+    let messageReceivedHandler: (message: Message) => void = null;
     let _radioInitialized = false;
 
     // Inicialización bajo demanda de la radio
@@ -38,7 +38,6 @@ namespace microspade {
     //% block="on agent start $name"
     //% blockId="microspade_on_agent_start"
     //% name.defl="agent"
-    //% handlerStatement=true
     //% group="Agente"
     //% weight=100
     export function onAgentStart(name: string, handler: () => void): void {
@@ -65,7 +64,6 @@ namespace microspade {
      */
     //% block="on agent stop"
     //% blockId="microspade_on_agent_stop"
-    //% handlerStatement=true
     //% group="Agente"
     //% weight=88
     export function onAgentStop(handler: () => void): void {
@@ -263,7 +261,7 @@ namespace microspade {
         /**
          * Crea un mensaje de respuesta invirtiendo destinatario y emisor.
          */
-        //% block="make reply from %this with body $replyBody"
+        //% block="make reply to message %this with body $replyBody"
         //% blockId="microspade_message_make_reply"
         //% group="Mensajes"
         //% weight=35
@@ -277,7 +275,6 @@ namespace microspade {
      */
     //% block="create message to $to body $body||performative $performative"
     //% blockId="microspade_create_message"
-    //% blockSetVariable="message"
     //% to.defl="agent"
     //% performative.defl=MessagePerformative.Inform
     //% group="Mensajes"
@@ -291,7 +288,6 @@ namespace microspade {
      */
     //% block="create message to $to body number $body || performative $performative"
     //% blockId="microspade_create_message_number"
-    //% blockSetVariable="message"
     //% to.defl="agent"
     //% body.defl=0
     //% performative.defl=MessagePerformative.Inform
@@ -330,6 +326,17 @@ namespace microspade {
         return isNaN(num) ? 0 : num;
     }
 
+    /**
+     * Comprueba si un mensaje existe (no es nulo ni indefinido).
+     */
+    //% block="message $message exists"
+    //% blockId="microspade_message_exists"
+    //% group="Mensajes"
+    //% weight=42
+    export function messageExists(message: Message): boolean {
+        return message !== null && message !== undefined;
+    }
+
     // Buzón de entrada de mensajes del Agente (Cola FIFO)
     let _mailbox: Message[] = [];
     const MAX_MAILBOX_SIZE = 10;
@@ -361,12 +368,12 @@ namespace microspade {
     /**
      * Evento que se ejecuta automáticamente cuando el agente recibe un mensaje dirigido a él.
      */
-    //% block="on message received $msg"
+    //% block="on message received $message"
     //% blockId="microspade_on_message_received"
     //% draggableParameters="reporter"
     //% group="Mensajes"
     //% weight=48
-    export function onMessageReceived(handler: (msg: Message) => void): void {
+    export function onMessageReceived(handler: (message: Message) => void): void {
         initRadio();
         messageReceivedHandler = handler;
     }
@@ -408,7 +415,6 @@ namespace microspade {
      */
     //% block="template matching||destination $to sender $sender performative $performative"
     //% blockId="microspade_create_template"
-    //% blockSetVariable="template"
     //% to.defl=""
     //% sender.defl=""
     //% group="Mensajes"
