@@ -81,3 +81,27 @@ assert(microspade.getMessageField(receivedInf, microspade.MessageField.Body) ===
 assert(microspade.receive() === null, "Mailbox should be empty now");
 
 serial.writeLine("Mailbox & Template tests completed successfully!");
+
+// Test 8: Ciclo de vida y onAgentStart
+serial.writeLine("Starting Agent Lifecycle tests...");
+let setupExecuted = false;
+microspade.onAgentStart("lifecycle_agent", function () {
+    setupExecuted = true;
+});
+assert(microspade.agentName === "lifecycle_agent", "Agent name should be 'lifecycle_agent'");
+assert(setupExecuted === true, "Setup callback should run immediately");
+assert(microspade.running === true, "Agent should be running by default");
+
+// Test 9: Parada del agente y onAgentStop
+let stopExecuted = false;
+microspade.onAgentStop(function () {
+    stopExecuted = true;
+});
+microspade.stopAgent();
+assert(microspade.running === false, "Agent should not be running after stopAgent");
+assert(stopExecuted === true, "Stop callback should run when agent stops");
+
+// Restaurar estado activo para que el agente quede listo
+microspade.running = true;
+
+serial.writeLine("Agent Lifecycle tests completed successfully!");

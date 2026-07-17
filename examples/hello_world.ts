@@ -2,7 +2,7 @@
 
 let myname = ""
 
-microspade.createAgent("saludador", function () {
+microspade.onAgentStart("saludador", function () {
     myname = "pepe"
 })
 
@@ -10,4 +10,4 @@ microspade.addOneShotBehaviour(function () {
     basic.showString("Hello " + myname)
 })
 
-microspade.startAgent()
+

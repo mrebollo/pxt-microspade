@@ -5,47 +5,45 @@
 namespace microspade {
     // Variables de estado del Agente (Singleton)
     export let agentName = "agent";
-    export let running = false;
-    let setupCallback: () => void = null;
+    export let running = true; // El agente arranca activo por defecto
+
+    let stopCallback: () => void = null;
+    let messageReceivedHandler: (msg: Message) => void = null;
+    let _radioInitialized = false;
+
+    // Inicialización bajo demanda de la radio
+    function initRadio(): void {
+        if (_radioInitialized) return;
+        _radioInitialized = true;
+        radio.onReceivedString(function (receivedString) {
+            if (!running) return;
+            let msg = Message.decode(receivedString);
+            if (msg) {
+                if (msg.getTo() === agentName || msg.getTo() === "*") {
+                    if (messageReceivedHandler) {
+                        control.runInBackground(() => {
+                            messageReceivedHandler(msg);
+                        });
+                    } else {
+                        queueMessage(msg);
+                    }
+                }
+            }
+        });
+    }
 
     /**
-     * Crea e inicializa el agente con un contenedor para variables y comportamientos.
+     * Configura la identidad y variables iniciales del agente en el arranque.
      */
-    //% block="create agent $name"
-    //% blockId="microspade_create_agent"
+    //% block="on agent start $name"
+    //% blockId="microspade_on_agent_start"
     //% name.defl="agent"
     //% handlerStatement=true
     //% group="Agente"
     //% weight=100
-    export function createAgent(name: string, handler: () => void): void {
+    export function onAgentStart(name: string, handler: () => void): void {
         agentName = name;
-        setupCallback = handler;
-        running = false;
-    }
-
-    /**
-     * Arranca el agente y activa sus comportamientos.
-     */
-    //% block="start agent"
-    //% blockId="microspade_start_agent"
-    //% group="Agente"
-    //% weight=95
-    export function startAgent(): void {
-        if (setupCallback) {
-            setupCallback();
-        }
-
-        // Registrar el receptor de radio en segundo plano
-        radio.onReceivedString(function (receivedString) {
-            let msg = Message.decode(receivedString);
-            if (msg) {
-                if (msg.getTo() === agentName || msg.getTo() === "*") {
-                    queueMessage(msg);
-                }
-            }
-        });
-
-        running = true;
+        handler(); // Ejecuta la inicialización de variables de forma síncrona
     }
 
     /**
@@ -57,6 +55,21 @@ namespace microspade {
     //% weight=90
     export function stopAgent(): void {
         running = false;
+        if (stopCallback) {
+            stopCallback();
+        }
+    }
+
+    /**
+     * Registra código que se ejecuta al detener el agente.
+     */
+    //% block="on agent stop"
+    //% blockId="microspade_on_agent_stop"
+    //% handlerStatement=true
+    //% group="Agente"
+    //% weight=88
+    export function onAgentStop(handler: () => void): void {
+        stopCallback = handler;
     }
 
     /**
@@ -81,11 +94,9 @@ namespace microspade {
     //% weight=70
     export function addOneShotBehaviour(handler: () => void): void {
         control.runInBackground(() => {
-            // Espera a que el agente se inicie explícitamente
-            while (!running) {
-                basic.pause(50);
+            if (running) {
+                handler();
             }
-            handler();
         });
     }
 
@@ -98,10 +109,6 @@ namespace microspade {
     //% weight=80
     export function addCyclicBehaviour(handler: () => void): void {
         control.runInBackground(() => {
-            // Espera a que el agente se inicie explícitamente
-            while (!running) {
-                basic.pause(50);
-            }
             while (running) {
                 handler();
                 basic.pause(10); // Pausa de cortesía para ceder la CPU
@@ -119,10 +126,6 @@ namespace microspade {
     //% weight=75
     export function addPeriodicBehaviour(periodMs: number, handler: () => void): void {
         control.runInBackground(() => {
-            // Espera a que el agente se inicie explícitamente
-            while (!running) {
-                basic.pause(50);
-            }
             while (running) {
                 handler();
                 basic.pause(periodMs);
@@ -140,10 +143,6 @@ namespace microspade {
     //% weight=65
     export function addTimeoutBehaviour(timeoutMs: number, handler: () => void): void {
         control.runInBackground(() => {
-            // Espera a que el agente se inicie explícitamente
-            while (!running) {
-                basic.pause(50);
-            }
             basic.pause(timeoutMs);
             if (running) {
                 handler();
@@ -288,6 +287,23 @@ namespace microspade {
     }
 
     /**
+     * Crea un mensaje estructurado con un cuerpo de tipo numérico.
+     */
+    //% block="create message to $to body number $body || performative $performative"
+    //% blockId="microspade_create_message_number"
+    //% blockSetVariable="message"
+    //% to.defl="agent"
+    //% body.defl=0
+    //% performative.defl=MessagePerformative.Inform
+    //% expandableArgumentMode="toggle"
+    //% inlineInputMode=inline
+    //% group="Mensajes"
+    //% weight=58
+    export function createMessageNumber(to: string, body: number, performative: MessagePerformative = MessagePerformative.Inform): Message {
+        return new Message(to, agentName, performative, "" + body);
+    }
+
+    /**
      * Obtiene el valor de un campo específico de un mensaje.
      */
     //% block="message $field of $message"
@@ -297,6 +313,21 @@ namespace microspade {
     export function getMessageField(message: Message, field: MessageField): string {
         if (!message) return "";
         return message.getField(field);
+    }
+
+    /**
+     * Obtiene el cuerpo de un mensaje interpretado como un número.
+     */
+    //% block="message body as number of $message"
+    //% blockId="microspade_message_get_body_number"
+    //% group="Mensajes"
+    //% weight=44
+    export function getMessageBodyNumber(message: Message): number {
+        if (!message) return 0;
+        let body = message.getField(MessageField.Body);
+        if (!body) return 0;
+        let num = parseFloat(body);
+        return isNaN(num) ? 0 : num;
     }
 
     // Buzón de entrada de mensajes del Agente (Cola FIFO)
@@ -323,7 +354,21 @@ namespace microspade {
     //% weight=55
     export function sendMessage(msg: Message): void {
         if (!msg) return;
+        initRadio();
         radio.sendString(msg.encode());
+    }
+
+    /**
+     * Evento que se ejecuta automáticamente cuando el agente recibe un mensaje dirigido a él.
+     */
+    //% block="on message received $msg"
+    //% blockId="microspade_on_message_received"
+    //% draggableParameters="reporter"
+    //% group="Mensajes"
+    //% weight=48
+    export function onMessageReceived(handler: (msg: Message) => void): void {
+        initRadio();
+        messageReceivedHandler = handler;
     }
 
     /**
@@ -382,6 +427,7 @@ namespace microspade {
     //% group="Mensajes"
     //% weight=50
     export function receive(template?: MessageTemplate): Message {
+        initRadio();
         if (_mailbox.length === 0) return null;
 
         if (!template) {

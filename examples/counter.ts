@@ -7,8 +7,8 @@ microspade.addCyclicBehaviour(function () {
     }
 })
 let countdown = 0
-microspade.createAgent("launcher", function () {
+microspade.onAgentStart("launcher", function () {
     countdown = 9
     basic.showNumber(countdown)
 })
-microspade.startAgent()
+

@@ -7,7 +7,7 @@ microspade.addPeriodicBehaviour(2000, function () {
 })
 let message: microspade.Message = null
 let temp = 0
-microspade.createAgent("ter", function () {
+microspade.onAgentStart("ter", function () {
 	
 })
-microspade.startAgent()
+

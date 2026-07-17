@@ -3,8 +3,8 @@ microspade.addOneShotBehaviour(function () {
     basic.showString(microspade.getMessageField(msg, microspade.MessageField.Performative))
     basic.showString(microspade.getMessageField(msg, microspade.MessageField.Body))
 })
-microspade.createAgent("ping", function () {
+microspade.onAgentStart("ping", function () {
     msg = microspade.createMessage("pong", "hello", microspade.MessagePerformative.Inform)
 })
 let msg: microspade.Message = null
-microspade.startAgent()
+
