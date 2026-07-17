@@ -2,7 +2,7 @@
 
 Esta extensión añade soporte para la programación de **Sistemas Multi-Agente (MAS)** ligeros en BBC micro:bit utilizando **TypeScript Estático** en MakeCode. Está especialmente diseñada para entornos educativos, permitiendo programar agentes mediante bloques o código.
 
-El modelo sigue la filosofía de agentes inteligentes ligeros basados en comportamientos concurrentes (inspirado en [https://spadeagents.eu/](SPADE)) y mensajería basada en el estándar [https://www.allaboutai.com/ai-glossary/fipa-acl/](FIPA-ACL) que se transmite mediante la radio nativa del micro:bit.
+El modelo sigue la filosofía de agentes inteligentes ligeros basados en comportamientos concurrentes (inspirado en [SPADE](https://spadeagents.eu/)) y mensajería basada en el estándar [FIPA-ACL](https://www.allaboutai.com/ai-glossary/fipa-acl/) que se transmite mediante la radio nativa del micro:bit.
 
 ## Qué es un agente
 
@@ -16,7 +16,7 @@ En el contexto de micro:bit, la abstracción de agente nos facilita la programac
 
 Microspade proporciona una serie de comportamientos básicos que se ejecutan en segundo plano mientras se sigue atendiendo a los eventos que llegan por los distintos sensores. De esta manera podemos programar tareas que queremos que se ejecuten de forma cíclica, a intervalos de tiempo fijos (periódica) o una sola vez (oneshot o timeout si tiene un plazo de tiempo). Gracias a ellos se enriquece la forma de trabajar con la micro:bit, pero sin renunciar a la programación reactiva tradicional. 
 
-Además, el modelo de mensajería nos facilita el diseño de aplicaciones que requieren la comunicación entre agentes. Está construido sobre el módulo de radio de micro:bit pero sin anularlo. De esta forma se puede seguir usando los mesajes de radio de la forma habitual, pero además se dispone de un mecanismo de más alto nivel y de un buzón para la comunicación entre agentes. El concepto de *performativa* viene de la [https://www.communicationtheory.org/speech-act-theory/](teoría de los actos de habla--speech acts--). Por ejemplo, un mensaje "temperatura=22" puede significar cosas distintas según estamos
+Además, el modelo de mensajería nos facilita el diseño de aplicaciones que requieren la comunicación entre agentes. Está construido sobre el módulo de radio de micro:bit pero sin anularlo. De esta forma se puede seguir usando los mesajes de radio de la forma habitual, pero además se dispone de un mecanismo de más alto nivel y de un buzón para la comunicación entre agentes. El concepto de *performativa* viene de la [teoría de los actos de habla (speech acts)](https://www.communicationtheory.org/speech-act-theory/). Por ejemplo, un mensaje "temperatura=22" puede significar cosas distintas según estamos
 - indicando qué temperatura hace (inform)
 - preguntando qué temperatura hace (query)
 - pidiendo que la habitación esté a esa temperatura (request)
