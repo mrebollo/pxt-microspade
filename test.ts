@@ -89,8 +89,8 @@ microspade.onAgentStart("lifecycle_agent", function () {
     setupExecuted = true;
 });
 assert(microspade.agentName === "lifecycle_agent", "Agent name should be 'lifecycle_agent'");
-assert(setupExecuted === true, "Setup callback should run immediately");
-assert(microspade.running === true, "Agent should be running by default");
+assert(setupExecuted, "Setup callback should run immediately");
+assert(microspade.running, "Agent should be running by default");
 
 // Test 9: Parada del agente y onAgentStop
 let stopExecuted = false;
@@ -98,8 +98,8 @@ microspade.onAgentStop(function () {
     stopExecuted = true;
 });
 microspade.stopAgent();
-assert(microspade.running === false, "Agent should not be running after stopAgent");
-assert(stopExecuted === true, "Stop callback should run when agent stops");
+assert(!microspade.running, "Agent should not be running after stopAgent");
+assert(stopExecuted, "Stop callback should run when agent stops");
 
 // Restaurar estado activo para que el agente quede listo
 microspade.running = true;

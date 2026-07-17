@@ -6,7 +6,7 @@ microspade.addCyclicBehaviour(function () {
     }
 })
 let received: microspade.Message = null
-microspade.onAgentStart("cli", function () {
+microspade.createAgent("cli", function () {
 	
 })
-
+microspade.startAgent()

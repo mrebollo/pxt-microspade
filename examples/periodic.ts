@@ -6,8 +6,8 @@ microspade.addPeriodicBehaviour(1000, function () {
     }
     on = !(on)
 })
-microspade.onAgentStart("launcher", function () {
+microspade.createAgent("launcher", function () {
     on = true
 })
 let on = false
-
+microspade.startAgent()

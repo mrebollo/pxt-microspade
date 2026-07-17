@@ -1,13 +1,8 @@
-// Ejemplo: Agente Saludador (Hello World)
-
-let myname = ""
-
-microspade.onAgentStart("saludador", function () {
-    myname = "pepe"
-})
-
 microspade.addOneShotBehaviour(function () {
     basic.showString("Hello " + myname)
 })
-
-
+let myname = ""
+microspade.createAgent(""saludador"", function () {
+    myname = "pepe"
+})
+microspade.startAgent()

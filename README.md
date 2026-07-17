@@ -103,7 +103,6 @@ microspade.addPeriodicBehaviour(5000, function () {
     let message = microspade.createMessage("cli", "" + temp, microspade.MessagePerformative.Inform)
     microspade.sendMessage(message)
 })
-
 ```
 
 ### 2. El Receptor (Cliente)
