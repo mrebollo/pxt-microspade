@@ -293,7 +293,7 @@ namespace microspade {
     /**
      * Crea un mensaje de respuesta a partir de otro invirtiendo destinatario y emisor.
      */
-    //% block="make reply to message $message with body $replyBody"
+    //% block="reply to $message with body $replyBody"
     //% blockId="microspade_message_make_reply"
     //% group="Mensajes"
     //% weight=35
@@ -309,7 +309,7 @@ namespace microspade {
     /**
      * Crea un mensaje de respuesta a partir de otro invirtiendo destinatario y emisor, con un cuerpo numérico.
      */
-    //% block="make reply to message $message with body number $replyBody"
+    //% block="reply to $message with body number $replyBody"
     //% blockId="microspade_message_make_reply_number"
     //% group="Mensajes"
     //% weight=34
@@ -325,7 +325,7 @@ namespace microspade {
     /**
      * Obtiene el valor de un campo específico de un mensaje.
      */
-    //% block="message $field of $message"
+    //% block="get $field of $message"
     //% blockId="microspade_message_get_field"
     //% group="Mensajes"
     //% weight=45
@@ -337,7 +337,7 @@ namespace microspade {
     /**
      * Obtiene el cuerpo de un mensaje interpretado como un número.
      */
-    //% block="message body as number of $message"
+    //% block="get body as number of $message"
     //% blockId="microspade_message_get_body_number"
     //% group="Mensajes"
     //% weight=44
@@ -352,7 +352,7 @@ namespace microspade {
     /**
      * Comprueba si un mensaje existe (no es nulo ni indefinido).
      */
-    //% block="message $message exists"
+    //% block="$message exists"
     //% blockId="microspade_message_exists"
     //% group="Mensajes"
     //% weight=42
