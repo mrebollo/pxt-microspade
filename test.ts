@@ -43,11 +43,16 @@ assert(rawSpecial === "receiver_agent|sender_agent|0|one\\|two\\|three", "Specia
 let decodedSpecial = microspade.Message.decode(rawSpecial);
 assert(microspade.getMessageField(decodedSpecial, microspade.MessageField.Body) === "one|two|three", "Special character decoding failed: " + microspade.getMessageField(decodedSpecial, microspade.MessageField.Body));
 
-// Test 6: Crear respuesta (makeReply)
+// Test 6: Crear respuesta (makeReply y makeReplyNumber)
 let reply = microspade.makeReply(msg, "got your message");
 assert(reply.getTo() === "sender_agent", "Reply destination should be 'sender_agent'");
-assert(reply.getSender() === "receiver_agent", "Reply sender should be 'receiver_agent'");
+assert(reply.getSender() === "sender_agent", "Reply sender should be 'sender_agent'");
 assert(reply.getBody() === "got your message", "Reply body should be 'got your message'");
+
+let replyNum = microspade.makeReplyNumber(msg, 42.5);
+assert(replyNum.getTo() === "sender_agent", "ReplyNum destination should be 'sender_agent'");
+assert(replyNum.getSender() === "sender_agent", "ReplyNum sender should be 'sender_agent'");
+assert(replyNum.getBody() === "42.5", "ReplyNum body should be '42.5'");
 
 serial.writeLine("All Message & Serialization tests completed successfully!");
 

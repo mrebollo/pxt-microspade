@@ -299,11 +299,27 @@ namespace microspade {
     //% weight=35
     export function makeReply(message: Message, replyBody: string): Message {
         if (!message) return null;
-        // Invertimos destinatario y emisor
+        // El destinatario es el emisor original, y el emisor somos nosotros (el agente actual)
         let to = message.getField(MessageField.Sender);
-        let sender = message.getField(MessageField.To);
+        let sender = agentName;
         let perf = message.getPerformative();
         return new Message(to, sender, perf, replyBody);
+    }
+
+    /**
+     * Crea un mensaje de respuesta a partir de otro invirtiendo destinatario y emisor, con un cuerpo numérico.
+     */
+    //% block="make reply to message $message with body number $replyBody"
+    //% blockId="microspade_message_make_reply_number"
+    //% group="Mensajes"
+    //% weight=34
+    export function makeReplyNumber(message: Message, replyBody: number): Message {
+        if (!message) return null;
+        // El destinatario es el emisor original, y el emisor somos nosotros (el agente actual)
+        let to = message.getField(MessageField.Sender);
+        let sender = agentName;
+        let perf = message.getPerformative();
+        return new Message(to, sender, perf, "" + replyBody);
     }
 
     /**
