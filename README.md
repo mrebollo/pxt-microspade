@@ -4,19 +4,10 @@
 
 ![micro:bit V2 Only](https://img.shields.io/badge/micro%3Abit-V2%20only-blue)
 
-This extension adds support for programming lightweight **Multi-Agent Systems (MAS)** on the BBC micro:bit using **Static TypeScript** in MakeCode. It is specifically designed for educational environments, allowing students to program agents using either blocks or code.
+This extension adds support for programming lightweight **Multi-Agent Systems (MAS)** on the BBC micro:bit in MakeCode. 
 
 > [!IMPORTANT]
 > **V2 Compatibility Required**: This extension requires the **micro:bit V2** hardware version and will not work on V1 boards. This is due to system memory requirements and the native support for long messages (up to 250 characters) transmitted over the radio.
-
----
-
-## Documentation & Resources
-
-For learning and reference, the following organized resources are available:
-
-*   **[Start Interactive Tutorial in MakeCode](https://makecode.microbit.org/#tutorial:github:mrebollo/pxt-microspade/TUTORIAL)**: A step-by-step interactive guide built directly into the editor to help you build your first agent.
-*   **[Read the Full Reference Manual](./MANUAL.md)**: A detailed theoretical guide explaining the agent philosophy, behaviour-based concurrency, and the FIPA-ACL messaging protocol.
 
 ---
 
@@ -24,9 +15,8 @@ For learning and reference, the following organized resources are available:
 
 A basic intelligent agent in micro:bit is defined by declaring its identity on startup and its concurrent background behaviours.
 
-```code
-
-microspade.onAgentStart("saludador", function () {
+```blocks
+microspade.onAgentStart("greater", function () {
     myname = "pepe"
 })
 
@@ -73,6 +63,15 @@ You can import complete example projects in MakeCode that already have the exten
     *   An agent named "cli" that cyclically consumes messages from its FIFO mailbox and displays them on the screen and serial console.
     *   [Open project in MakeCode Blocks](https://makecode.microbit.org/S98372-55681-97269-00640)
     *   Source code: [examples/mailbox_client.ts](./examples/mailbox_client.ts)
+
+---
+
+## Documentation & Resources
+
+For learning and reference, the following organized resources are available:
+
+*   **[Start Interactive Tutorial in MakeCode](https://makecode.microbit.org/#tutorial:github:mrebollo/pxt-microspade/TUTORIAL)**: A step-by-step interactive guide built directly into the editor to help you build your first agent.
+*   **[Read the Full Reference Manual](./MANUAL.md)**: A detailed theoretical guide explaining the agent philosophy, behaviour-based concurrency, and the FIPA-ACL messaging protocol.
 
 ---
 

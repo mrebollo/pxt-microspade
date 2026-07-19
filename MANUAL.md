@@ -69,7 +69,7 @@ microspade.addOneShotBehaviour(function () {
 ```
 In this example, we drag the "on agent start" block and name our agent "saludador". This name is used to identify it in an environment with multiple agents and send messages to it. If no name is provided, it defaults to "agent". Create a variable "name" and write the text you want the greeting to show.
 
-To add a behaviour that runs once, drag the "add one shot behaviour" block. Inside, add a "show string" block and fill it with the greeting text (e.g. "Hello " joined with the "name" variable).
+To add a behaviour that runs once, drag the "one shot behaviour" block. Inside, add a "show string" block and fill it with the greeting text (e.g. "Hello " joined with the "name" variable).
 
 When you start the board, you will see the greeting display on the LEDs.
 
@@ -83,7 +83,7 @@ In this example, you can see how communication between agents is performed. We w
 
 This agent periodically measures the temperature and sends an `inform` message to the receiver.
 
-Create an "on agent start" block and name it, for example, "temp". Then drag the "add periodic behaviour" block and specify the execution period in milliseconds, for example, 5000 (every 5 seconds). Inside, we will add blocks to send the temperature. Drag the "set message..." block inside and fill in:
+Create an "on agent start" block and name it, for example, "temp". Then drag the "periodic behaviour" block and specify the execution period in milliseconds, for example, 5000 (every 5 seconds). Inside, we will add blocks to send the temperature. Drag the "set message..." block inside and fill in:
 - in "to" put the receiver agent name, e.g. "cli".
 - in "body" drag the temperature sensor reading block from "Input".
 - click (+) to show "performative", which defaults to "inform".

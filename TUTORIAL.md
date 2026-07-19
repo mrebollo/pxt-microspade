@@ -25,8 +25,8 @@ microspade.onAgentStart("greeter", function () {
 })
 ```
 
-## Step 3: Add a One Shot behaviour
-Drag the block `add one shot behaviour` onto the workspace.
+## Step 3: Add an One Shot behaviour
+Drag the block `one shot behaviour` onto the workspace.
 This block will run its contents in the background immediately after the agent starts.
 
 ```blocks
@@ -40,7 +40,7 @@ microspade.addOneShotBehaviour(function () {
 ```
 
 ## Step 4: Display the personalized greeting
-Inside `add one shot behaviour`, place a `show string` block from the **Basic** category.
+Inside `one shot behaviour`, place a `show string` block from the **Basic** category.
 Make it show the text `"Hello "` joined with the value of the `name` variable.
 
 ```blocks

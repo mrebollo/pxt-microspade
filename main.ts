@@ -86,7 +86,7 @@ namespace microspade {
     /**
      * Executes an action once in the background after the agent starts.
      */
-    //% block="add one shot behaviour"
+    //% block="one shot behaviour"
     //% blockId="microspade_add_oneshot"
     //% group="Behaviours"
     //% weight=70
@@ -101,7 +101,7 @@ namespace microspade {
     /**
      * Executes an action continuously in a loop in the background while the agent is running.
      */
-    //% block="add cyclic behaviour"
+    //% block="cyclic behaviour"
     //% blockId="microspade_add_cyclic"
     //% group="Behaviours"
     //% weight=80
@@ -117,7 +117,7 @@ namespace microspade {
     /**
      * Executes an action periodically in the background at fixed time intervals.
      */
-    //% block="add periodic behaviour every $periodMs ms"
+    //% block="periodic behaviour every $periodMs ms"
     //% blockId="microspade_add_periodic"
     //% periodMs.defl=1000
     //% group="Behaviours"
@@ -134,7 +134,7 @@ namespace microspade {
     /**
      * Executes an action once in the background after a specified delay once the agent starts.
      */
-    //% block="add timeout behaviour after $timeoutMs ms"
+    //% block="timeout behaviour after $timeoutMs ms"
     //% blockId="microspade_add_timeout"
     //% timeoutMs.defl=2000
     //% group="Behaviours"
@@ -291,33 +291,33 @@ namespace microspade {
     /**
      * Creates a reply message by inverting the destination and setting the sender as the current agent.
      */
-    //% block="reply to $message with body $replyBody"
+    //% block="reply to $message with body $replyBody||performative $performative"
     //% blockId="microspade_message_make_reply"
+    //% performative.defl=MessagePerformative.Inform
     //% group="Messages"
     //% weight=35
-    export function makeReply(message: Message, replyBody: string): Message {
+    export function makeReply(message: Message, replyBody: string, performative: MessagePerformative = MessagePerformative.Inform): Message {
         if (!message) return null;
         // The destination is the original sender, and the sender is the current agent
         let to = message.getField(MessageField.Sender);
         let sender = agentName;
-        let perf = message.getPerformative();
-        return new Message(to, sender, perf, replyBody);
+        return new Message(to, sender, performative, replyBody);
     }
 
     /**
      * Creates a reply message by inverting the destination and setting the sender as the current agent, with a numeric body.
      */
-    //% block="reply to $message with body number $replyBody"
+    //% block="reply to $message with body number $replyBody||performative $performative"
     //% blockId="microspade_message_make_reply_number"
+    //% performative.defl=MessagePerformative.Inform
     //% group="Messages"
     //% weight=34
-    export function makeReplyNumber(message: Message, replyBody: number): Message {
+    export function makeReplyNumber(message: Message, replyBody: number, performative: MessagePerformative = MessagePerformative.Inform): Message {
         if (!message) return null;
         // The destination is the original sender, and the sender is the current agent
         let to = message.getField(MessageField.Sender);
         let sender = agentName;
-        let perf = message.getPerformative();
-        return new Message(to, sender, perf, "" + replyBody);
+        return new Message(to, sender, performative, "" + replyBody);
     }
 
     /**
