@@ -434,7 +434,7 @@ namespace microspade {
     /**
      * Creates a template to filter messages in the mailbox.
      */
-    //% block="template matching||destination $to sender $sender performative $performative"
+    //% block="matching||performative $performative sender $sender destination $to"
     //% blockId="microspade_create_template"
     //% to.defl=""
     //% sender.defl=""
@@ -449,7 +449,7 @@ namespace microspade {
      * Extracts and returns the first message from the mailbox matching the template (if specified).
      * Returns null if no matching message is found.
      */
-    //% block="receive message||matching template $template"
+    //% block="receive message||$template"
     //% blockId="microspade_receive_message"
     //% group="Messages"
     //% weight=50
