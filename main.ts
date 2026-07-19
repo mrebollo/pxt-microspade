@@ -1,17 +1,17 @@
 /**
- * microspade — Agentes inteligentes ligeros para BBC micro:bit
+ * microspade — Lightweight intelligent agents for BBC micro:bit
  */
-//% color="#4a90e2" icon="\u2660" block="Microspade" groups='["Agente", "Comportamientos", "Mensajes"]'
+//% color="#4a90e2" icon="\u2660" block="Micro:spade" groups='["Agent", "Behaviours", "Messages"]'
 namespace microspade {
-    // Variables de estado del Agente (Singleton)
+    // Agent state variables (Singleton)
     export let agentName = "agent";
-    export let running = true; // El agente arranca activo por defecto
+    export let running = true; // The agent starts active by default
 
     let stopCallback: () => void = null;
     let messageReceivedHandler: (message: Message) => void = null;
     let _radioInitialized = false;
 
-    // Inicialización bajo demanda de la radio
+    // Lazy initialization of the radio module
     function initRadio(): void {
         if (_radioInitialized) return;
         _radioInitialized = true;
@@ -33,24 +33,24 @@ namespace microspade {
     }
 
     /**
-     * Configura la identidad y variables iniciales del agente en el arranque.
+     * Configures the agent's identity and runs initialization code on startup.
      */
     //% block="on agent start $name"
     //% blockId="microspade_on_agent_start"
     //% name.defl="agent"
-    //% group="Agente"
+    //% group="Agent"
     //% weight=100
     export function onAgentStart(name: string, handler: () => void): void {
         agentName = name;
-        handler(); // Ejecuta la inicialización de variables de forma síncrona
+        handler(); // Run variable initialization synchronously
     }
 
     /**
-     * Detiene al agente y apaga sus comportamientos.
+     * Stops the agent and shuts down its behaviours.
      */
     //% block="stop agent"
     //% blockId="microspade_stop_agent"
-    //% group="Agente"
+    //% group="Agent"
     //% weight=90
     export function stopAgent(): void {
         running = false;
@@ -60,35 +60,35 @@ namespace microspade {
     }
 
     /**
-     * Registra código que se ejecuta al detener el agente.
+     * Registers code to execute when the agent stops.
      */
     //% block="on agent stop"
     //% blockId="microspade_on_agent_stop"
-    //% group="Agente"
+    //% group="Agent"
     //% weight=88
     export function onAgentStop(handler: () => void): void {
         stopCallback = handler;
     }
 
     /**
-     * Obtiene el nombre del agente actual.
+     * Gets the name of the current agent.
      */
     //% block="agent name"
     //% blockId="microspade_agent_name"
-    //% group="Agente"
+    //% group="Agent"
     //% weight=85
     export function getAgentName(): string {
         return agentName;
     }
 
-    // --- COMPORTAMIENTOS BASADOS EN FIBRAS ---
+    // --- FIBRE-BASED BEHAVIOURS ---
 
     /**
-     * Ejecuta una acción una sola vez en segundo plano cuando el agente se inicia.
+     * Executes an action once in the background after the agent starts.
      */
     //% block="add one shot behaviour"
     //% blockId="microspade_add_oneshot"
-    //% group="Comportamientos"
+    //% group="Behaviours"
     //% weight=70
     export function addOneShotBehaviour(handler: () => void): void {
         control.runInBackground(() => {
@@ -99,28 +99,28 @@ namespace microspade {
     }
 
     /**
-     * Ejecuta una acción continuamente en bucle en segundo plano mientras el agente esté corriendo.
+     * Executes an action continuously in a loop in the background while the agent is running.
      */
     //% block="add cyclic behaviour"
     //% blockId="microspade_add_cyclic"
-    //% group="Comportamientos"
+    //% group="Behaviours"
     //% weight=80
     export function addCyclicBehaviour(handler: () => void): void {
         control.runInBackground(() => {
             while (running) {
                 handler();
-                basic.pause(10); // Pausa de cortesía para ceder la CPU
+                basic.pause(10); // Yield CPU to other fibres
             }
         });
     }
 
     /**
-     * Ejecuta una acción periódicamente en segundo plano cada intervalo de tiempo.
+     * Executes an action periodically in the background at fixed time intervals.
      */
     //% block="add periodic behaviour every $periodMs ms"
     //% blockId="microspade_add_periodic"
     //% periodMs.defl=1000
-    //% group="Comportamientos"
+    //% group="Behaviours"
     //% weight=75
     export function addPeriodicBehaviour(periodMs: number, handler: () => void): void {
         control.runInBackground(() => {
@@ -132,12 +132,12 @@ namespace microspade {
     }
 
     /**
-     * Ejecuta una acción una sola vez en segundo plano tras una espera de tiempo una vez iniciado el agente.
+     * Executes an action once in the background after a specified delay once the agent starts.
      */
     //% block="add timeout behaviour after $timeoutMs ms"
     //% blockId="microspade_add_timeout"
     //% timeoutMs.defl=2000
-    //% group="Comportamientos"
+    //% group="Behaviours"
     //% weight=65
     export function addTimeoutBehaviour(timeoutMs: number, handler: () => void): void {
         control.runInBackground(() => {
@@ -181,7 +181,7 @@ namespace microspade {
     const _performativeNames = ["inform", "request", "query", "confirm", "disconfirm", "agree", "refuse", "failure"];
 
     /**
-     * Clase que representa un Mensaje entre agentes.
+     * Class representing a Message between agents.
      */
     //% blockNamespace="microspade" class="Message"
     export class Message {
@@ -224,17 +224,17 @@ namespace microspade {
         }
 
         /**
-         * Codifica el mensaje en una cadena de texto para su envío por radio.
+         * Encodes the message into a string for radio transmission.
          */
         public encode(): string {
             let bodyEncoded = this.body ? this.body.split("|").join("\\|") : "";
-            // Enviar el índice de la performativa (0-7) para ahorrar espacio por radio (máximo 19 caracteres en v1/simulador)
+            // Send the performative index (0-7) to save radio payload space (max 19 chars on v1/simulator)
             let perfStr = "" + this.performative;
             return (this.to || "") + "|" + (this.sender || "") + "|" + perfStr + "|" + bodyEncoded;
         }
 
         /**
-         * Decodifica una cadena de texto recibida por radio en un objeto Message.
+         * Decodes a string received via radio into a Message object.
          */
         public static decode(raw: string): Message {
             if (!raw) return null;
@@ -251,31 +251,29 @@ namespace microspade {
             let bodyEncoded = raw.substr(idx3 + 1);
             let body = bodyEncoded.split("\\|").join("|");
 
-            // Convertimos el carácter del índice de la performativa de vuelta a su valor numérico
-            let perfCode = performativeStr.charCodeAt(0) - 48; // '0' es 48 en ASCII
+            // Convert the performative index character back to its numeric value
+            let perfCode = performativeStr.charCodeAt(0) - 48; // '0' is 48 in ASCII
             let performative = (perfCode >= 0 && perfCode <= 7) ? perfCode : MessagePerformative.Inform;
 
             return new Message(to, sender, performative, body);
         }
-
-        // La clase Message finaliza de forma limpia
     }
 
     /**
-     * Crea un nuevo mensaje rellenando el emisor automáticamente con el nombre del agente.
+     * Creates a new message, auto-filling the sender with the current agent's name.
      */
     //% block="create message to $to body $body||performative $performative"
     //% blockId="microspade_create_message"
     //% to.defl="agent"
     //% performative.defl=MessagePerformative.Inform
-    //% group="Mensajes"
+    //% group="Messages"
     //% weight=60
     export function createMessage(to: string, body: string, performative: MessagePerformative = MessagePerformative.Inform): Message {
         return new Message(to, agentName, performative, body);
     }
 
     /**
-     * Crea un mensaje estructurado con un cuerpo de tipo numérico.
+     * Creates a structured message with a numeric body.
      */
     //% block="create message to $to body number $body || performative $performative"
     //% blockId="microspade_create_message_number"
@@ -284,22 +282,22 @@ namespace microspade {
     //% performative.defl=MessagePerformative.Inform
     //% expandableArgumentMode="toggle"
     //% inlineInputMode=inline
-    //% group="Mensajes"
+    //% group="Messages"
     //% weight=58
     export function createMessageNumber(to: string, body: number, performative: MessagePerformative = MessagePerformative.Inform): Message {
         return new Message(to, agentName, performative, "" + body);
     }
 
     /**
-     * Crea un mensaje de respuesta a partir de otro invirtiendo destinatario y emisor.
+     * Creates a reply message by inverting the destination and setting the sender as the current agent.
      */
     //% block="reply to $message with body $replyBody"
     //% blockId="microspade_message_make_reply"
-    //% group="Mensajes"
+    //% group="Messages"
     //% weight=35
     export function makeReply(message: Message, replyBody: string): Message {
         if (!message) return null;
-        // El destinatario es el emisor original, y el emisor somos nosotros (el agente actual)
+        // The destination is the original sender, and the sender is the current agent
         let to = message.getField(MessageField.Sender);
         let sender = agentName;
         let perf = message.getPerformative();
@@ -307,15 +305,15 @@ namespace microspade {
     }
 
     /**
-     * Crea un mensaje de respuesta a partir de otro invirtiendo destinatario y emisor, con un cuerpo numérico.
+     * Creates a reply message by inverting the destination and setting the sender as the current agent, with a numeric body.
      */
     //% block="reply to $message with body number $replyBody"
     //% blockId="microspade_message_make_reply_number"
-    //% group="Mensajes"
+    //% group="Messages"
     //% weight=34
     export function makeReplyNumber(message: Message, replyBody: number): Message {
         if (!message) return null;
-        // El destinatario es el emisor original, y el emisor somos nosotros (el agente actual)
+        // The destination is the original sender, and the sender is the current agent
         let to = message.getField(MessageField.Sender);
         let sender = agentName;
         let perf = message.getPerformative();
@@ -323,11 +321,11 @@ namespace microspade {
     }
 
     /**
-     * Obtiene el valor de un campo específico de un mensaje.
+     * Gets the value of a specific field from a message.
      */
     //% block="get $field of $message"
     //% blockId="microspade_message_get_field"
-    //% group="Mensajes"
+    //% group="Messages"
     //% weight=45
     export function getMessageField(message: Message, field: MessageField): string {
         if (!message) return "";
@@ -335,11 +333,11 @@ namespace microspade {
     }
 
     /**
-     * Obtiene el cuerpo de un mensaje interpretado como un número.
+     * Gets the body of a message interpreted as a number.
      */
     //% block="get body as number of $message"
     //% blockId="microspade_message_get_body_number"
-    //% group="Mensajes"
+    //% group="Messages"
     //% weight=44
     export function getMessageBodyNumber(message: Message): number {
         if (!message) return 0;
@@ -350,37 +348,37 @@ namespace microspade {
     }
 
     /**
-     * Comprueba si un mensaje existe (no es nulo ni indefinido).
+     * Checks if a message exists (is not null or undefined).
      */
     //% block="$message exists"
     //% blockId="microspade_message_exists"
-    //% group="Mensajes"
+    //% group="Messages"
     //% weight=42
     export function messageExists(message: Message): boolean {
         return message !== null && message !== undefined;
     }
 
-    // Buzón de entrada de mensajes del Agente (Cola FIFO)
+    // Agent's incoming mailbox (FIFO queue)
     let _mailbox: Message[] = [];
     const MAX_MAILBOX_SIZE = 10;
 
     /**
-     * Añade manualmente un mensaje al buzón de entrada (útil para pruebas locales).
+     * Manually adds a message to the mailbox queue (useful for local tests).
      */
     export function queueMessage(msg: Message): void {
         if (!msg) return;
         if (_mailbox.length >= MAX_MAILBOX_SIZE) {
-            _mailbox.shift(); // Elimina el mensaje más antiguo para liberar RAM
+            _mailbox.shift(); // Remove oldest message to free up RAM
         }
         _mailbox.push(msg);
     }
 
     /**
-     * Envía un mensaje por radio.
+     * Sends a message via radio.
      */
     //% block="send message $msg"
     //% blockId="microspade_send_message"
-    //% group="Mensajes"
+    //% group="Messages"
     //% weight=55
     export function sendMessage(msg: Message): void {
         if (!msg) return;
@@ -389,12 +387,12 @@ namespace microspade {
     }
 
     /**
-     * Evento que se ejecuta automáticamente cuando el agente recibe un mensaje dirigido a él.
+     * Event that runs automatically when the agent receives a message addressed to it.
      */
     //% block="on message received $message"
     //% blockId="microspade_on_message_received"
     //% draggableParameters="reporter"
-    //% group="Mensajes"
+    //% group="Messages"
     //% weight=48
     export function onMessageReceived(handler: (message: Message) => void): void {
         initRadio();
@@ -402,7 +400,7 @@ namespace microspade {
     }
 
     /**
-     * Plantilla para filtrar mensajes del buzón.
+     * Template to filter mailbox messages.
      */
     //% blockNamespace="microspade" class="MessageTemplate"
     export class MessageTemplate {
@@ -419,13 +417,13 @@ namespace microspade {
         public match(msg: Message): boolean {
             if (!msg) return false;
 
-            // Comprobación de destinatario (si está definido)
+            // Check destination (if specified)
             if (this.to && msg.getTo() !== this.to) return false;
 
-            // Comprobación de emisor (si está definido)
+            // Check sender (if specified)
             if (this.sender && msg.getSender() !== this.sender) return false;
 
-            // Comprobación de performativa: -1 (o undefined en JS) significa "any" / no filtrar
+            // Check performative: -1 (or undefined in JS) means "any" / do not filter
             if (this.performative !== undefined && this.performative !== -1 && msg.getPerformative() !== this.performative) {
                 return false;
             }
@@ -434,13 +432,13 @@ namespace microspade {
     }
 
     /**
-     * Crea una plantilla para filtrar mensajes en el buzón.
+     * Creates a template to filter messages in the mailbox.
      */
     //% block="template matching||destination $to sender $sender performative $performative"
     //% blockId="microspade_create_template"
     //% to.defl=""
     //% sender.defl=""
-    //% group="Mensajes"
+    //% group="Messages"
     //% weight=40
     export function createMessageTemplate(to: string = "", sender: string = "", performative?: MessagePerformative): MessageTemplate {
         let perf = (performative === undefined) ? -1 : performative;
@@ -448,26 +446,26 @@ namespace microspade {
     }
 
     /**
-     * Extrae y devuelve el primer mensaje del buzón que coincida con la plantilla (si se especifica).
-     * Devuelve null si no hay ningún mensaje coincidente.
+     * Extracts and returns the first message from the mailbox matching the template (if specified).
+     * Returns null if no matching message is found.
      */
     //% block="receive message||matching template $template"
     //% blockId="microspade_receive_message"
-    //% group="Mensajes"
+    //% group="Messages"
     //% weight=50
     export function receive(template?: MessageTemplate): Message {
         initRadio();
         if (_mailbox.length === 0) return null;
 
         if (!template) {
-            return _mailbox.shift(); // FIFO estándar
+            return _mailbox.shift(); // Standard FIFO
         }
 
-        // Buscar el primer mensaje que coincida con el filtro
+        // Find the first message that matches the filter
         for (let i = 0; i < _mailbox.length; i++) {
             if (template.match(_mailbox[i])) {
                 let msg = _mailbox[i];
-                _mailbox.splice(i, 1); // Lo extraemos del buzón
+                _mailbox.splice(i, 1); // Extract it from the mailbox
                 return msg;
             }
         }
