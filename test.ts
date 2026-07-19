@@ -54,6 +54,16 @@ assert(replyNum.getTo() === "sender_agent", "ReplyNum destination should be 'sen
 assert(replyNum.getSender() === "sender_agent", "ReplyNum sender should be 'sender_agent'");
 assert(replyNum.getBody() === "42.5", "ReplyNum body should be '42.5'");
 
+// Test 6b: Verificar performativa por defecto y personalizada en respuestas
+assert(reply.getPerformative() === microspade.MessagePerformative.Inform, "Default reply performative should be 'Inform'");
+assert(replyNum.getPerformative() === microspade.MessagePerformative.Inform, "Default replyNum performative should be 'Inform'");
+
+let replyCustom = microspade.makeReply(msg, "agreed", microspade.MessagePerformative.Agree);
+assert(replyCustom.getPerformative() === microspade.MessagePerformative.Agree, "Custom reply performative should be 'Agree'");
+
+let replyCustomNum = microspade.makeReplyNumber(msg, 100, microspade.MessagePerformative.Confirm);
+assert(replyCustomNum.getPerformative() === microspade.MessagePerformative.Confirm, "Custom reply number performative should be 'Confirm'");
+
 serial.writeLine("All Message & Serialization tests completed successfully!");
 
 // Test 7: Pruebas del Buzón de Entrada y Plantillas de Filtrado

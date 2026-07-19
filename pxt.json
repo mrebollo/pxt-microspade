@@ -3,7 +3,8 @@
     "description": "Agentes inteligentes ligeros para BBC micro:bit basados en agantes SPADE",
     "dependencies": {
         "core": "*",
-        "radio": "*"
+        "radio": "*",
+        "microphone": "*"
     },
     "files": [
         "main.ts",
