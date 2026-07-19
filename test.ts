@@ -70,7 +70,7 @@ serial.writeLine("All Message & Serialization tests completed successfully!");
 serial.writeLine("Starting Mailbox & Template tests...");
 
 // Vaciar el buzón si tuviera algo
-while (microspade.receive() !== null) {}
+while (microspade.receive() !== null) { }
 
 // Crear mensajes de prueba
 let msgInform = microspade.createMessage("pinger", "value: 22", microspade.MessagePerformative.Inform);
@@ -81,7 +81,7 @@ microspade.queueMessage(msgInform);
 microspade.queueMessage(msgRequest);
 
 // Test 7.1: Recepción con filtro de tipo (Request)
-let filterRequest = microspade.createMessageTemplate("", "", microspade.MessagePerformative.Request);
+let filterRequest = microspade.createMessageTemplate(microspade.MessagePerformative.Request, "", "");
 let receivedReq = microspade.receive(filterRequest);
 
 assert(receivedReq !== null, "Should have received a message matching Request filter");
