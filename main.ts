@@ -440,8 +440,9 @@ namespace microspade {
     //% sender.defl=""
     //% group="Messages"
     //% weight=40
-    export function createMessageTemplate(performative: MessagePerformative = -1, sender: string = "", to: string = ""): MessageTemplate {
-        return new MessageTemplate(to, sender, performative);
+    export function createMessageTemplate(performative: MessagePerformative = null, sender: string = "", to: string = ""): MessageTemplate {
+        let perf = (performative === null || performative === undefined) ? -1 : performative;
+        return new MessageTemplate(to, sender, perf);
     }
 
     /**
