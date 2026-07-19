@@ -81,8 +81,7 @@ microspade.queueMessage(msgInform);
 microspade.queueMessage(msgRequest);
 
 // Test 7.1: Recepción con filtro de tipo (Request)
-let filterRequest = microspade.createMessageTemplate(microspade.MessagePerformative.Request, "", "");
-let receivedReq = microspade.receive(filterRequest);
+let receivedReq = microspade.receive(microspade.MessagePerformative.Request);
 
 assert(receivedReq !== null, "Should have received a message matching Request filter");
 assert(microspade.getMessageField(receivedReq, microspade.MessageField.Body) === "action: turn_on", "Should match the Request body");
@@ -91,6 +90,13 @@ assert(microspade.getMessageField(receivedReq, microspade.MessageField.Body) ===
 let receivedInf = microspade.receive();
 assert(receivedInf !== null, "Should have received the remaining Inform message");
 assert(microspade.getMessageField(receivedInf, microspade.MessageField.Body) === "value: 22", "Should match the Inform body");
+
+// Test 7.2b: Recepción con filtro de contenido en el cuerpo (body)
+let msgCFP = microspade.createMessage("pinger", "action: cfp", microspade.MessagePerformative.Inform);
+microspade.queueMessage(msgCFP);
+let receivedCFP = microspade.receive(null, "cfp");
+assert(receivedCFP !== null, "Should have received a message matching body 'cfp'");
+assert(microspade.getMessageField(receivedCFP, microspade.MessageField.Body) === "action: cfp", "Should match the CFP body");
 
 // Test 7.3: Recepción de buzón vacío
 assert(microspade.receive() === null, "Mailbox should be empty now");

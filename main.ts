@@ -160,22 +160,24 @@ namespace microspade {
     }
 
     export enum MessagePerformative {
+        //% block="any"
+        Any = -1,
         //% block="inform"
-        Inform,
+        Inform = 0,
         //% block="request"
-        Request,
+        Request = 1,
         //% block="query"
-        Query,
+        Query = 2,
         //% block="confirm"
-        Confirm,
+        Confirm = 3,
         //% block="disconfirm"
-        Disconfirm,
+        Disconfirm = 4,
         //% block="agree"
-        Agree,
+        Agree = 5,
         //% block="refuse"
-        Refuse,
+        Refuse = 6,
         //% block="failure"
-        Failure
+        Failure = 7
     }
 
     const _performativeNames = ["inform", "request", "query", "confirm", "disconfirm", "agree", "refuse", "failure"];
@@ -400,74 +402,46 @@ namespace microspade {
     }
 
     /**
-     * Template to filter mailbox messages.
-     */
-    //% blockNamespace="microspade" class="MessageTemplate"
-    export class MessageTemplate {
-        public to: string;
-        public sender: string;
-        public performative: MessagePerformative;
-
-        constructor(to: string, sender: string, performative: MessagePerformative) {
-            this.to = to || "";
-            this.sender = sender || "";
-            this.performative = performative;
-        }
-
-        public match(msg: Message): boolean {
-            if (!msg) return false;
-
-            // Check destination (if specified)
-            if (this.to && msg.getTo() !== this.to) return false;
-
-            // Check sender (if specified)
-            if (this.sender && msg.getSender() !== this.sender) return false;
-
-            // Check performative: -1 (or undefined in JS) means "any" / do not filter
-            if (this.performative !== undefined && this.performative !== -1 && msg.getPerformative() !== this.performative) {
-                return false;
-            }
-            return true;
-        }
-    }
-
-    /**
-     * Creates a template to filter messages in the mailbox.
-     */
-    //% block="matching||performative $performative sender $sender destination $to"
-    //% blockId="microspade_create_template"
-    //% to.defl=""
-    //% sender.defl=""
-    //% group="Messages"
-    //% weight=40
-    export function createMessageTemplate(performative: MessagePerformative = null, sender: string = "", to: string = ""): MessageTemplate {
-        let perf = (performative === null || performative === undefined) ? -1 : performative;
-        return new MessageTemplate(to, sender, perf);
-    }
-
-    /**
-     * Extracts and returns the first message from the mailbox matching the template (if specified).
+     * Extracts and returns the first message from the mailbox matching the filter (if specified).
      * Returns null if no matching message is found.
      */
-    //% block="receive message||$template"
+    //% block="receive message||matching performative $performative body contains $body sender $sender destination $to"
     //% blockId="microspade_receive_message"
+    //% performative.defl=null
+    //% body.defl=null
+    //% sender.defl=null
+    //% to.defl=null
     //% group="Messages"
     //% weight=50
-    export function receive(template?: MessageTemplate): Message {
+    export function receive(performative: MessagePerformative = null, body: string = null, sender: string = null, to: string = null): Message {
         initRadio();
         if (_mailbox.length === 0) return null;
 
-        if (!template) {
+        let hasFilter = (performative !== null && performative !== undefined) || 
+                        (body !== null && body !== undefined && body !== "") || 
+                        (sender !== null && sender !== undefined && sender !== "") || 
+                        (to !== null && to !== undefined && to !== "");
+        if (!hasFilter) {
             return _mailbox.shift(); // Standard FIFO
         }
 
+        let perfVal = (performative === null || performative === undefined) ? -1 : performative;
+
         // Find the first message that matches the filter
         for (let i = 0; i < _mailbox.length; i++) {
-            if (template.match(_mailbox[i])) {
-                let msg = _mailbox[i];
-                _mailbox.splice(i, 1); // Extract it from the mailbox
-                return msg;
-            }
+            let msg = _mailbox[i];
+            
+            // Check destination
+            if (to && msg.getTo() !== to) continue;
+            // Check sender
+            if (sender && msg.getSender() !== sender) continue;
+            // Check performative
+            if (perfVal !== -1 && msg.getPerformative() !== perfVal) continue;
+            // Check body
+            if (body && msg.getBody().indexOf(body) === -1) continue;
+
+            _mailbox.splice(i, 1); // Extract it from the mailbox
+            return msg;
         }
         return null;
     }
