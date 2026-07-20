@@ -81,7 +81,7 @@ microspade.queueMessage(msgInform);
 microspade.queueMessage(msgRequest);
 
 // Test 7.1: Recepción con filtro de tipo (Request)
-let receivedReq = microspade.receive(microspade.MessagePerformative.Request);
+let receivedReq = microspade.receive(microspade.PerformativeFilter.Request);
 
 assert(receivedReq !== null, "Should have received a message matching Request filter");
 assert(microspade.getMessageField(receivedReq, microspade.MessageField.Body) === "action: turn_on", "Should match the Request body");

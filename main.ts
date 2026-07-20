@@ -160,8 +160,6 @@ namespace microspade {
     }
 
     export enum MessagePerformative {
-        //% block="any"
-        Any = -1,
         //% block="inform"
         Inform = 0,
         //% block="request"
@@ -178,6 +176,27 @@ namespace microspade {
         Refuse = 6,
         //% block="failure"
         Failure = 7
+    }
+
+    export enum PerformativeFilter {
+        //% block="any"
+        Any = -1,
+        //% block="inform"
+        Inform = MessagePerformative.Inform,
+        //% block="request"
+        Request = MessagePerformative.Request,
+        //% block="query"
+        Query = MessagePerformative.Query,
+        //% block="confirm"
+        Confirm = MessagePerformative.Confirm,
+        //% block="disconfirm"
+        Disconfirm = MessagePerformative.Disconfirm,
+        //% block="agree"
+        Agree = MessagePerformative.Agree,
+        //% block="refuse"
+        Refuse = MessagePerformative.Refuse,
+        //% block="failure"
+        Failure = MessagePerformative.Failure
     }
 
     const _performativeNames = ["inform", "request", "query", "confirm", "disconfirm", "agree", "refuse", "failure"];
@@ -407,17 +426,19 @@ namespace microspade {
      */
     //% block="receive message||matching performative $performative body contains $body sender $sender destination $to"
     //% blockId="microspade_receive_message"
-    //% performative.defl=null
+    //% performative.defl=PerformativeFilter.Any
     //% body.defl=null
     //% sender.defl=null
     //% to.defl=null
     //% group="Messages"
     //% weight=50
-    export function receive(performative: MessagePerformative = null, body: string = null, sender: string = null, to: string = null): Message {
+    export function receive(performative: PerformativeFilter = null, body: string = null, sender: string = null, to: string = null): Message {
         initRadio();
         if (_mailbox.length === 0) return null;
 
-        let hasFilter = (performative !== null && performative !== undefined) || 
+        let perfVal = (performative === null || performative === undefined) ? -1 : (performative as number);
+
+        let hasFilter = (perfVal !== -1) || 
                         (body !== null && body !== undefined && body !== "") || 
                         (sender !== null && sender !== undefined && sender !== "") || 
                         (to !== null && to !== undefined && to !== "");
@@ -425,12 +446,10 @@ namespace microspade {
             return _mailbox.shift(); // Standard FIFO
         }
 
-        let perfVal = (performative === null || performative === undefined) ? -1 : performative;
-
         // Find the first message that matches the filter
         for (let i = 0; i < _mailbox.length; i++) {
             let msg = _mailbox[i];
-            
+
             // Check destination
             if (to && msg.getTo() !== to) continue;
             // Check sender
