@@ -20,7 +20,7 @@ microspade.onAgentStart("greeter", function () {
     myname = "pepe"
 })
 
-microspade.addOneShotBehaviour(function () {
+microspade.addOneShotBehaviour("helloTask", function () {
     basic.showString("Hello " + myname)
 })
 ```
@@ -30,10 +30,10 @@ microspade.addOneShotBehaviour(function () {
 ```cards
 microspade.onAgentStart("agent", () => {})
 microspade.onAgentStop(() => {})
-microspade.addOneShotBehaviour(() => {})
-microspade.addCyclicBehaviour(() => {})
-microspade.addPeriodicBehaviour(1000, () => {})
-microspade.addTimeoutBehaviour(2000, () => {})
+microspade.addOneShotBehaviour("task", () => {})
+microspade.addCyclicBehaviour("task", () => {})
+microspade.addPeriodicBehaviour("task", 1000, () => {})
+microspade.addTimeoutBehaviour("task", 2000, () => {})
 microspade.createMessage("agent", "body")
 microspade.onMessageReceived((message) => {})
 microspade.makeReply(null, "body")

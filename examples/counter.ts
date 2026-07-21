@@ -1,5 +1,5 @@
 let countdown = 0
-microspade.addCyclicBehaviour(function () {
+microspade.addCyclicBehaviour("countdownTask", function () {
     countdown += -1
     basic.showNumber(countdown)
     if (countdown == 0) {

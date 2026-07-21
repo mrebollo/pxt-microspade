@@ -91,15 +91,12 @@ namespace microspade {
     //% name.defl="task"
     //% group="Behaviours"
     //% weight=70
-    export function addOneShotBehaviour(name: string, handler: () => void): void;
-    export function addOneShotBehaviour(handler: () => void): void;
-    export function addOneShotBehaviour(arg1: any, arg2?: any): void {
-        let behaviorHandler = (typeof arg1 === "function") ? arg1 : arg2;
-        if (!behaviorHandler) return;
+    export function addOneShotBehaviour(name: string, handler: () => void): void {
+        if (!handler) return;
 
         control.runInBackground(() => {
             if (running) {
-                behaviorHandler();
+                handler();
             }
         });
     }
@@ -112,15 +109,12 @@ namespace microspade {
     //% name.defl="task"
     //% group="Behaviours"
     //% weight=80
-    export function addCyclicBehaviour(name: string, handler: () => void): void;
-    export function addCyclicBehaviour(handler: () => void): void;
-    export function addCyclicBehaviour(arg1: any, arg2?: any): void {
-        let behaviorHandler = (typeof arg1 === "function") ? arg1 : arg2;
-        if (!behaviorHandler) return;
+    export function addCyclicBehaviour(name: string, handler: () => void): void {
+        if (!handler) return;
 
         control.runInBackground(() => {
             while (running) {
-                behaviorHandler();
+                handler();
                 basic.pause(10); // Yield CPU to other fibres
             }
         });
@@ -135,16 +129,12 @@ namespace microspade {
     //% periodMs.defl=1000
     //% group="Behaviours"
     //% weight=75
-    export function addPeriodicBehaviour(name: string, periodMs: number, handler: () => void): void;
-    export function addPeriodicBehaviour(periodMs: number, handler: () => void): void;
-    export function addPeriodicBehaviour(arg1: any, arg2: any, arg3?: any): void {
-        let periodMs = (typeof arg1 === "number") ? arg1 : arg2;
-        let behaviorHandler = (typeof arg1 === "string") ? arg3 : arg2;
-        if (!behaviorHandler) return;
+    export function addPeriodicBehaviour(name: string, periodMs: number, handler: () => void): void {
+        if (!handler) return;
 
         control.runInBackground(() => {
             while (running) {
-                behaviorHandler();
+                handler();
                 basic.pause(periodMs);
             }
         });
@@ -159,17 +149,13 @@ namespace microspade {
     //% timeoutMs.defl=2000
     //% group="Behaviours"
     //% weight=65
-    export function addTimeoutBehaviour(name: string, timeoutMs: number, handler: () => void): void;
-    export function addTimeoutBehaviour(timeoutMs: number, handler: () => void): void;
-    export function addTimeoutBehaviour(arg1: any, arg2: any, arg3?: any): void {
-        let timeoutMs = (typeof arg1 === "number") ? arg1 : arg2;
-        let behaviorHandler = (typeof arg1 === "string") ? arg3 : arg2;
-        if (!behaviorHandler) return;
+    export function addTimeoutBehaviour(name: string, timeoutMs: number, handler: () => void): void {
+        if (!handler) return;
 
         control.runInBackground(() => {
             basic.pause(timeoutMs);
             if (running) {
-                behaviorHandler();
+                handler();
             }
         });
     }
@@ -464,10 +450,10 @@ namespace microspade {
 
         let perfVal = (performative === null || performative === undefined) ? -1 : (performative as number);
 
-        let hasFilter = (perfVal !== -1) || 
-                        (body !== null && body !== undefined && body !== "") || 
-                        (sender !== null && sender !== undefined && sender !== "") || 
-                        (to !== null && to !== undefined && to !== "");
+        let hasFilter = (perfVal !== -1) ||
+            (body !== null && body !== undefined && body !== "") ||
+            (sender !== null && sender !== undefined && sender !== "") ||
+            (to !== null && to !== undefined && to !== "");
         if (!hasFilter) {
             return _mailbox.shift(); // Standard FIFO
         }

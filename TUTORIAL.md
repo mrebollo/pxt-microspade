@@ -34,7 +34,7 @@ let name = ""
 microspade.onAgentStart("greeter", function () {
     name = "pepe"
 })
-microspade.addOneShotBehaviour(function () {
+microspade.addOneShotBehaviour("helloTask", function () {
 	
 })
 ```
@@ -48,7 +48,7 @@ let name = ""
 microspade.onAgentStart("greeter", function () {
     name = "pepe"
 })
-microspade.addOneShotBehaviour(function () {
+microspade.addOneShotBehaviour("helloTask", function () {
     basic.showString("Hello " + name)
 })
 ```

@@ -63,7 +63,7 @@ microspade.onAgentStart("saludador", function () {
     myname = "pepe"
 })
 
-microspade.addOneShotBehaviour(function () {
+microspade.addOneShotBehaviour("helloTask", function () {
     basic.showString("Hello " + myname)
 })
 ```
@@ -95,7 +95,7 @@ microspade.onAgentStart("temp", function () {
 
 })
 
-microspade.addPeriodicBehaviour(5000, function () {
+microspade.addPeriodicBehaviour("sendTemperature", 5000, function () {
     let temp = input.temperature()
     basic.showNumber(temp)
     let message = microspade.createMessage("cli", "" + temp, microspade.MessagePerformative.Inform)

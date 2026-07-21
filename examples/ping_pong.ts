@@ -1,5 +1,5 @@
 let msg: microspade.Message = null
-microspade.addOneShotBehaviour(function () {
+microspade.addOneShotBehaviour("inspectMessage", function () {
     basic.showString(microspade.getMessageField(msg, microspade.MessageField.To))
     basic.showString(microspade.getMessageField(msg, microspade.MessageField.Performative))
     basic.showString(microspade.getMessageField(msg, microspade.MessageField.Body))

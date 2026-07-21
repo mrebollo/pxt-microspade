@@ -20,7 +20,7 @@ microspade.onAgentStart("greater", function () {
     myname = "pepe"
 })
 
-microspade.addOneShotBehaviour(function () {
+microspade.addOneShotBehaviour("helloTask", function () {
     basic.showString("Hello " + myname)
 })
 ```

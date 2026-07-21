@@ -1,5 +1,5 @@
 let on = false
-microspade.addPeriodicBehaviour(1000, function () {
+microspade.addPeriodicBehaviour("blinkTask", 1000, function () {
     if (on) {
         basic.showIcon(IconNames.Diamond)
     } else {
