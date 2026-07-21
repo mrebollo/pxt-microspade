@@ -2,24 +2,32 @@
 
 This is the simplest micro:spade example: an agent initializes a variable and runs a one-shot behaviour.
 
-## Blocks
+## Create the agent
+
+First of all, drag the "on agent start" block. Optionally, 
+write a name for the agent. It can contain any variable initialization or code preparation.
 
 ```blocks
-let text = ""
 microspade.onAgentStart("agent", function () {
-    text = "pepe"
-})
+    text = "world"
+```
+
+## Create the behabiour
+
+Drag and drop the "one shot" behaviour. 
+
+
+```blocks
 microspade.addOneShotBehaviour("helloTask", function () {
     basic.showString("Hello " + text)
 })
 ```
 
-## JavaScript
 
-```typescript
+```code
 let text = ""
 microspade.onAgentStart("agent", function () {
-    text = "pepe"
+    text = "world"
 })
 microspade.addOneShotBehaviour("helloTask", function () {
     basic.showString("Hello " + text)

@@ -86,7 +86,7 @@ namespace microspade {
     /**
      * Executes an action once in the background after the agent starts.
      */
-    //% block="one shot behaviour $name"
+    //% block="one shot $name"
     //% blockId="microspade_add_oneshot"
     //% name.defl="task"
     //% group="Behaviours"
@@ -104,7 +104,7 @@ namespace microspade {
     /**
      * Executes an action continuously in a loop in the background while the agent is running.
      */
-    //% block="cyclic behaviour $name"
+    //% block="cyclic $name"
     //% blockId="microspade_add_cyclic"
     //% name.defl="task"
     //% group="Behaviours"
@@ -123,7 +123,7 @@ namespace microspade {
     /**
      * Executes an action periodically in the background at fixed time intervals.
      */
-    //% block="periodic behaviour $name every $periodMs ms"
+    //% block="periodic $name every $periodMs ms"
     //% blockId="microspade_add_periodic"
     //% name.defl="task"
     //% periodMs.defl=1000
@@ -143,7 +143,7 @@ namespace microspade {
     /**
      * Executes an action once in the background after a specified delay once the agent starts.
      */
-    //% block="timeout behaviour $name after $timeoutMs ms"
+    //% block="timeout $name after $timeoutMs ms"
     //% blockId="microspade_add_timeout"
     //% name.defl="task"
     //% timeoutMs.defl=2000
