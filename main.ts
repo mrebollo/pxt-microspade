@@ -86,14 +86,20 @@ namespace microspade {
     /**
      * Executes an action once in the background after the agent starts.
      */
-    //% block="one shot behaviour"
+    //% block="one shot behaviour $name"
     //% blockId="microspade_add_oneshot"
+    //% name.defl="task"
     //% group="Behaviours"
     //% weight=70
-    export function addOneShotBehaviour(handler: () => void): void {
+    export function addOneShotBehaviour(name: string, handler: () => void): void;
+    export function addOneShotBehaviour(handler: () => void): void;
+    export function addOneShotBehaviour(arg1: any, arg2?: any): void {
+        let behaviorHandler = (typeof arg1 === "function") ? arg1 : arg2;
+        if (!behaviorHandler) return;
+
         control.runInBackground(() => {
             if (running) {
-                handler();
+                behaviorHandler();
             }
         });
     }
@@ -101,14 +107,20 @@ namespace microspade {
     /**
      * Executes an action continuously in a loop in the background while the agent is running.
      */
-    //% block="cyclic behaviour"
+    //% block="cyclic behaviour $name"
     //% blockId="microspade_add_cyclic"
+    //% name.defl="task"
     //% group="Behaviours"
     //% weight=80
-    export function addCyclicBehaviour(handler: () => void): void {
+    export function addCyclicBehaviour(name: string, handler: () => void): void;
+    export function addCyclicBehaviour(handler: () => void): void;
+    export function addCyclicBehaviour(arg1: any, arg2?: any): void {
+        let behaviorHandler = (typeof arg1 === "function") ? arg1 : arg2;
+        if (!behaviorHandler) return;
+
         control.runInBackground(() => {
             while (running) {
-                handler();
+                behaviorHandler();
                 basic.pause(10); // Yield CPU to other fibres
             }
         });
@@ -117,15 +129,22 @@ namespace microspade {
     /**
      * Executes an action periodically in the background at fixed time intervals.
      */
-    //% block="periodic behaviour every $periodMs ms"
+    //% block="periodic behaviour $name every $periodMs ms"
     //% blockId="microspade_add_periodic"
+    //% name.defl="task"
     //% periodMs.defl=1000
     //% group="Behaviours"
     //% weight=75
-    export function addPeriodicBehaviour(periodMs: number, handler: () => void): void {
+    export function addPeriodicBehaviour(name: string, periodMs: number, handler: () => void): void;
+    export function addPeriodicBehaviour(periodMs: number, handler: () => void): void;
+    export function addPeriodicBehaviour(arg1: any, arg2: any, arg3?: any): void {
+        let periodMs = (typeof arg1 === "number") ? arg1 : arg2;
+        let behaviorHandler = (typeof arg1 === "string") ? arg3 : arg2;
+        if (!behaviorHandler) return;
+
         control.runInBackground(() => {
             while (running) {
-                handler();
+                behaviorHandler();
                 basic.pause(periodMs);
             }
         });
@@ -134,16 +153,23 @@ namespace microspade {
     /**
      * Executes an action once in the background after a specified delay once the agent starts.
      */
-    //% block="timeout behaviour after $timeoutMs ms"
+    //% block="timeout behaviour $name after $timeoutMs ms"
     //% blockId="microspade_add_timeout"
+    //% name.defl="task"
     //% timeoutMs.defl=2000
     //% group="Behaviours"
     //% weight=65
-    export function addTimeoutBehaviour(timeoutMs: number, handler: () => void): void {
+    export function addTimeoutBehaviour(name: string, timeoutMs: number, handler: () => void): void;
+    export function addTimeoutBehaviour(timeoutMs: number, handler: () => void): void;
+    export function addTimeoutBehaviour(arg1: any, arg2: any, arg3?: any): void {
+        let timeoutMs = (typeof arg1 === "number") ? arg1 : arg2;
+        let behaviorHandler = (typeof arg1 === "string") ? arg3 : arg2;
+        if (!behaviorHandler) return;
+
         control.runInBackground(() => {
             basic.pause(timeoutMs);
             if (running) {
-                handler();
+                behaviorHandler();
             }
         });
     }
