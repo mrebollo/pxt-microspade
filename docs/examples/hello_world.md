@@ -33,3 +33,8 @@ microspade=github:mrebollo/pxt-microspade
 ```
 
 Source in repository: [examples/hello_world.ts](../../examples/hello_world.ts)
+
+<script src="https://makecode.com/gh-pages-embed.js"></script>
+<script>
+  makeCodeRender("https://makecode.microbit.org/", "mrebollo/pxt-microspade");
+</script>
