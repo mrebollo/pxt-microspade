@@ -7,24 +7,27 @@ This is the simplest micro:spade example: an agent initializes a variable and ru
 First of all, drag the "on agent start" block. Optionally, 
 write a name for the agent. It can contain any variable initialization or code preparation.
 
-```blocks
+```block
 microspade.onAgentStart("agent", function () {
     text = "world"
 ```
 
 ## Create the behabiour
 
-Drag and drop the "one shot" behaviour. 
+Drag and drop the "one shot" behaviour and add a block to compose and write the sentence.
 
 
-```blocks
+```block
 microspade.addOneShotBehaviour("helloTask", function () {
     basic.showString("Hello " + text)
 })
 ```
 
+## Complete example.
 
-```code
+Here there is the complete code. You can try it and make changes to check its functionality.
+
+```blocks
 let text = ""
 microspade.onAgentStart("agent", function () {
     text = "world"
