@@ -71,6 +71,7 @@ You can import complete example projects in MakeCode that already have the exten
 For learning and reference, the following organized resources are available:
 
 *   **[Start Interactive Tutorial in MakeCode](https://makecode.microbit.org/#tutorial:github:mrebollo/pxt-microspade/TUTORIAL)**: A step-by-step interactive guide built directly into the editor to help you build your first agent.
+*   **[Browse Example Index](./docs/examples.md)**: A single entry point with all examples and links to each docs page.
 *   **[Read the Full Reference Manual](./MANUAL.md)**: A detailed theoretical guide explaining the agent philosophy, behaviour-based concurrency, and the FIPA-ACL messaging protocol.
 
 ---
