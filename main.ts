@@ -131,8 +131,6 @@ namespace microspade {
     //% blockId="microspade_add_oneshot"
     //% name.defl="task"
     //% priority.defl=0
-    //% priority.min=0
-    //% priority.max=100
     //% group="Behaviours"
     //% weight=70
     export function addOneShotBehaviour(name: string, handler: () => void, priority: number = 0): void {
@@ -152,8 +150,6 @@ namespace microspade {
     //% blockId="microspade_add_cyclic"
     //% name.defl="task"
     //% priority.defl=0
-    //% priority.min=0
-    //% priority.max=100
     //% group="Behaviours"
     //% weight=80
     export function addCyclicBehaviour(name: string, handler: () => void, priority: number = 0): void {
@@ -177,8 +173,6 @@ namespace microspade {
     //% name.defl="task"
     //% periodMs.defl=1000
     //% priority.defl=0
-    //% priority.min=0
-    //% priority.max=100
     //% group="Behaviours"
     //% weight=75
     export function addPeriodicBehaviour(name: string, periodMs: number, handler: () => void, priority: number = 0): void {
@@ -202,8 +196,6 @@ namespace microspade {
     //% name.defl="task"
     //% timeoutMs.defl=2000
     //% priority.defl=0
-    //% priority.min=0
-    //% priority.max=100
     //% group="Behaviours"
     //% weight=65
     export function addTimeoutBehaviour(name: string, timeoutMs: number, handler: () => void, priority: number = 0): void {
