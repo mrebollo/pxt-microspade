@@ -130,13 +130,13 @@ serial.writeLine("Starting Behaviour Priority tests...");
 let lowTaskExecuted = false;
 let highTaskExecuted = false;
 
-microspade.addCyclicBehaviour("lowTask", function () {
+microspade.addCyclicBehaviour("lowTask", 0, function () {
     lowTaskExecuted = true;
-}, 0);
+});
 
-microspade.addCyclicBehaviour("highTask", function () {
+microspade.addCyclicBehaviour("highTask", 10, function () {
     highTaskExecuted = true;
-}, 10);
+});
 
 serial.writeLine("Behaviour Priority tests defined successfully!");
 serial.writeLine("Agent Lifecycle & Priority tests completed successfully!");

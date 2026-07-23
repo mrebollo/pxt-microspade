@@ -133,7 +133,7 @@ namespace microspade {
     //% priority.defl=0
     //% group="Behaviours"
     //% weight=70
-    export function addOneShotBehaviour(name: string, handler: () => void, priority: number = 0): void {
+    export function addOneShotBehaviour(name: string, priority: number = 0, handler: () => void): void {
         if (!handler) return;
 
         control.runInBackground(() => {
@@ -152,7 +152,7 @@ namespace microspade {
     //% priority.defl=0
     //% group="Behaviours"
     //% weight=80
-    export function addCyclicBehaviour(name: string, handler: () => void, priority: number = 0): void {
+    export function addCyclicBehaviour(name: string, priority: number = 0, handler: () => void): void {
         if (!handler) return;
 
         control.runInBackground(() => {
@@ -175,7 +175,7 @@ namespace microspade {
     //% priority.defl=0
     //% group="Behaviours"
     //% weight=75
-    export function addPeriodicBehaviour(name: string, periodMs: number, handler: () => void, priority: number = 0): void {
+    export function addPeriodicBehaviour(name: string, periodMs: number = 1000, priority: number = 0, handler: () => void): void {
         if (!handler) return;
 
         control.runInBackground(() => {
@@ -198,7 +198,7 @@ namespace microspade {
     //% priority.defl=0
     //% group="Behaviours"
     //% weight=65
-    export function addTimeoutBehaviour(name: string, timeoutMs: number, handler: () => void, priority: number = 0): void {
+    export function addTimeoutBehaviour(name: string, timeoutMs: number = 2000, priority: number = 0, handler: () => void): void {
         if (!handler) return;
 
         control.runInBackground(() => {
