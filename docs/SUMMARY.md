@@ -8,6 +8,7 @@
     * [Periodic](/examples/periodic)
     * [Timeout](/examples/timeout)
     * [Multiple Behaviours](/examples/multiple_behaviours)
+    * [Priority Behaviours](/examples/priority)
     * [Ping Pong](/examples/ping_pong)
     * [Incoming](/examples/incoming)
     * [Template](/examples/template)

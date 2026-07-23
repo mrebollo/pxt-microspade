@@ -148,7 +148,10 @@ You can import complete example projects in MakeCode that already have the exten
     *   An advanced security alarm example that coordinates a cyclic behaviour (sound/visual alert), a periodic behaviour (light level reading), and a startup one-shot greeting.
     *   [Open project in MakeCode Blocks](https://makecode.microbit.org/S61477-30178-40152-19010)
     *   Source code: [examples/multiple_behaviours.ts](./examples/multiple_behaviours.ts)
-6.  **Basic Ping-Pong Messages (ping pong)**:
+6.  **Priority Behaviours (priority)**:
+    *   Demonstrates Subsumption Architecture where a high-priority obstacle avoidance behaviour automatically inhibits a low-priority patrol behaviour when a hazard is detected.
+    *   Source code: [examples/priority.ts](./examples/priority.ts)
+7.  **Basic Ping-Pong Messages (ping pong)**:
     *   Initializes and sends an *Inform* message from a "ping" agent to a "pong" agent, inspecting fields.
     *   [Open project in MakeCode Blocks](https://makecode.microbit.org/S53359-29013-76397-15353)
     *   Source code: [examples/ping_pong.ts](./examples/ping_pong.ts)

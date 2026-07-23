@@ -9,6 +9,7 @@ This page collects all micro:spade examples in one place. Each entry includes a 
 - [periodic](./examples/periodic): Uses a periodic behaviour to alternate icons every second.
 - [timeout](./examples/timeout): Uses a timeout behaviour to run a delayed action.
 - [multiple_behaviours](./examples/multiple_behaviours): Combines one-shot, cyclic, and periodic behaviours in a coordinated alarm.
+- [priority](./examples/priority): Demonstrates behaviour priority inhibition (Subsumption Architecture) where an obstacle avoidance task overrides patrol movement.
 
 ## Message handling
 

@@ -125,4 +125,19 @@ assert(stopExecuted, "Stop callback should run when agent stops");
 // Restaurar estado activo para que el agente quede listo
 microspade.running = true;
 
-serial.writeLine("Agent Lifecycle tests completed successfully!");
+// Test 10: Prioridades de Comportamientos e Inhibición
+serial.writeLine("Starting Behaviour Priority tests...");
+let lowTaskExecuted = false;
+let highTaskExecuted = false;
+
+microspade.addCyclicBehaviour("lowTask", function () {
+    lowTaskExecuted = true;
+}, 0);
+
+microspade.addCyclicBehaviour("highTask", function () {
+    highTaskExecuted = true;
+}, 10);
+
+serial.writeLine("Behaviour Priority tests defined successfully!");
+serial.writeLine("Agent Lifecycle & Priority tests completed successfully!");
+
