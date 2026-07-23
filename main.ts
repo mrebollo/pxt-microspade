@@ -83,19 +83,62 @@ namespace microspade {
 
     // --- FIBRE-BASED BEHAVIOURS ---
 
+    // Priority Inhibition State (Subsumption Architecture)
+    let _activePriority: number = 0;
+    let _lastHighPriorityTime: number = 0;
+
+    /**
+     * Window of time (in milliseconds) that a higher-priority behavior holds
+     * exclusive control over lower-priority behaviors.
+     * 
+     * Rationale for 200 ms:
+     * Sensors on the micro:bit (such as ultrasonic sonar or infrared line sensors)
+     * are typically polled in loops every 30 to 100 ms. A 200 ms window covers 
+     * approximately 3 to 4 sensor polling cycles, preventing low-priority behaviors
+     * from "glitching" or "flickering" the actuators in between sensor readings.
+     * If a high-priority behavior stops executing for more than 200 ms, the inhibition
+     * automatically expires and lower-priority behaviors resume smoothly.
+     */
+    const INHIBITION_WINDOW_MS = 200;
+
+    /**
+     * Internal helper function that checks whether a behavior with the given priority
+     * is allowed to execute or is currently inhibited by a higher-priority behavior.
+     */
+    function shouldExecute(priority: number): boolean {
+        let now = control.millis();
+
+        // 1. If the inhibition window has expired, reset active priority back to base level (0)
+        if (now - _lastHighPriorityTime > INHIBITION_WINDOW_MS) {
+            _activePriority = 0;
+        }
+
+        // 2. If the current behavior's priority is lower than active priority, it is INHIBITED
+        if (priority < _activePriority) {
+            return false;
+        }
+
+        // 3. If equal or higher priority, claim or renew control
+        _activePriority = priority;
+        _lastHighPriorityTime = now;
+        return true;
+    }
+
     /**
      * Executes an action once in the background after the agent starts.
      */
-    //% block="one shot $name"
+    //% block="one shot $name||priority $priority"
     //% blockId="microspade_add_oneshot"
     //% name.defl="task"
+    //% priority.defl=0
+    //% priority.min=0 priority.max=100
     //% group="Behaviours"
     //% weight=70
-    export function addOneShotBehaviour(name: string, handler: () => void): void {
+    export function addOneShotBehaviour(name: string, handler: () => void, priority: number = 0): void {
         if (!handler) return;
 
         control.runInBackground(() => {
-            if (running) {
+            if (running && shouldExecute(priority)) {
                 handler();
             }
         });
@@ -104,17 +147,21 @@ namespace microspade {
     /**
      * Executes an action continuously in a loop in the background while the agent is running.
      */
-    //% block="cyclic $name"
+    //% block="cyclic $name||priority $priority"
     //% blockId="microspade_add_cyclic"
     //% name.defl="task"
+    //% priority.defl=0
+    //% priority.min=0 priority.max=100
     //% group="Behaviours"
     //% weight=80
-    export function addCyclicBehaviour(name: string, handler: () => void): void {
+    export function addCyclicBehaviour(name: string, handler: () => void, priority: number = 0): void {
         if (!handler) return;
 
         control.runInBackground(() => {
             while (running) {
-                handler();
+                if (shouldExecute(priority)) {
+                    handler();
+                }
                 basic.pause(10); // Yield CPU to other fibres
             }
         });
@@ -123,18 +170,22 @@ namespace microspade {
     /**
      * Executes an action periodically in the background at fixed time intervals.
      */
-    //% block="periodic $name every $periodMs ms"
+    //% block="periodic $name every $periodMs ms||priority $priority"
     //% blockId="microspade_add_periodic"
     //% name.defl="task"
     //% periodMs.defl=1000
+    //% priority.defl=0
+    //% priority.min=0 priority.max=100
     //% group="Behaviours"
     //% weight=75
-    export function addPeriodicBehaviour(name: string, periodMs: number, handler: () => void): void {
+    export function addPeriodicBehaviour(name: string, periodMs: number, handler: () => void, priority: number = 0): void {
         if (!handler) return;
 
         control.runInBackground(() => {
             while (running) {
-                handler();
+                if (shouldExecute(priority)) {
+                    handler();
+                }
                 basic.pause(periodMs);
             }
         });
@@ -143,18 +194,20 @@ namespace microspade {
     /**
      * Executes an action once in the background after a specified delay once the agent starts.
      */
-    //% block="timeout $name after $timeoutMs ms"
+    //% block="timeout $name after $timeoutMs ms||priority $priority"
     //% blockId="microspade_add_timeout"
     //% name.defl="task"
     //% timeoutMs.defl=2000
+    //% priority.defl=0
+    //% priority.min=0 priority.max=100
     //% group="Behaviours"
     //% weight=65
-    export function addTimeoutBehaviour(name: string, timeoutMs: number, handler: () => void): void {
+    export function addTimeoutBehaviour(name: string, timeoutMs: number, handler: () => void, priority: number = 0): void {
         if (!handler) return;
 
         control.runInBackground(() => {
             basic.pause(timeoutMs);
-            if (running) {
+            if (running && shouldExecute(priority)) {
                 handler();
             }
         });
