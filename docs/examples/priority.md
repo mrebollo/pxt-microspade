@@ -19,12 +19,12 @@ microspade.onAgentStart("robot", function () {
 This cyclic behaviour runs the normal patrol routine with a low priority (10). It displays alternating diamond icons to indicate movement.
 
 ```blocks
-microspade.addCyclicBehaviour("patrol", function () {
+microspade.addCyclicBehaviour("patrol", 10, function () {
     basic.showIcon(IconNames.SmallDiamond)
     basic.pause(150)
     basic.showIcon(IconNames.Diamond)
     basic.pause(150)
-}, 10)
+})
 ```
 
 ## High-priority behaviour (Obstacle avoidance)
@@ -32,7 +32,7 @@ microspade.addCyclicBehaviour("patrol", function () {
 This periodic behaviour runs every 50 ms with a high priority (30). When the light level falls below the threshold (simulating an obstacle sensor), it executes an emergency alert and holds high-priority control. While active, it automatically inhibits the lower-priority patrol behaviour.
 
 ```blocks
-microspade.addPeriodicBehaviour("obstacleAvoidance", 50, function () {
+microspade.addPeriodicBehaviour("obstacleAvoidance", 50, 30, function () {
     if (input.lightLevel() < 30) {
         obstaculo = true
         basic.showIcon(IconNames.No)
@@ -40,7 +40,7 @@ microspade.addPeriodicBehaviour("obstacleAvoidance", 50, function () {
     } else {
         obstaculo = false
     }
-}, 30)
+})
 ```
 
 ## Complete example
@@ -49,16 +49,19 @@ Here is the complete code. You can test it in MakeCode to observe how the high-p
 
 ```blocks
 let obstaculo = false
+
 microspade.onAgentStart("robot", function () {
     obstaculo = false
 })
-microspade.addCyclicBehaviour("patrol", function () {
+
+microspade.addCyclicBehaviour("patrol", 10, function () {
     basic.showIcon(IconNames.SmallDiamond)
     basic.pause(150)
     basic.showIcon(IconNames.Diamond)
     basic.pause(150)
-}, 10)
-microspade.addPeriodicBehaviour("obstacleAvoidance", 50, function () {
+})
+
+microspade.addPeriodicBehaviour("obstacleAvoidance", 50, 30, function () {
     if (input.lightLevel() < 30) {
         obstaculo = true
         basic.showIcon(IconNames.No)
@@ -66,7 +69,7 @@ microspade.addPeriodicBehaviour("obstacleAvoidance", 50, function () {
     } else {
         obstaculo = false
     }
-}, 30)
+})
 ```
 
 ---
