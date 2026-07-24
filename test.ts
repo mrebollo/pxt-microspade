@@ -125,19 +125,38 @@ assert(stopExecuted, "Stop callback should run when agent stops");
 // Restaurar estado activo para que el agente quede listo
 microspade.running = true;
 
-// Test 10: Prioridades de Comportamientos e Inhibición
+// Test 10: Prioridades de Comportamientos, Inhibición y Anti-Inversión
 serial.writeLine("Starting Behaviour Priority tests...");
+
+// Test 10.1: Asignación de prioridad inicial (10)
+microspade.setPriority(10);
+assert(microspade.getActivePriority() === 10, "Active priority should be 10");
+
+// Test 10.2: Intento de inversión con prioridad menor (5) -> Debe ser ignorada y mantenerse en 10
+microspade.setPriority(5);
+assert(microspade.getActivePriority() === 10, "Lower priority (5) should be rejected when active priority is 10");
+
+// Test 10.3: Asignación de prioridad mayor (20) -> Debe elevarse a 20
+microspade.setPriority(20);
+assert(microspade.getActivePriority() === 20, "Higher priority (20) should override current active priority (10)");
+
+// Test 10.4: Liberación de prioridad -> Debe restablecer a 0
+microspade.releasePriority();
+assert(microspade.getActivePriority() === 0, "Releasing priority should reset active priority back to 0");
+
+// Test 10.5: Registro de comportamientos
 let lowTaskExecuted = false;
 let highTaskExecuted = false;
 
-microspade.addCyclicBehaviour("lowTask", 0, function () {
+microspade.addCyclicBehaviour("lowTask", function () {
     lowTaskExecuted = true;
 });
 
-microspade.addCyclicBehaviour("highTask", 10, function () {
+microspade.addPeriodicBehaviour("highTask", 50, function () {
+    microspade.setPriority(10);
     highTaskExecuted = true;
+    microspade.releasePriority();
 });
 
-serial.writeLine("Behaviour Priority tests defined successfully!");
-serial.writeLine("Agent Lifecycle & Priority tests completed successfully!");
+serial.writeLine("Behaviour Priority & Anti-Inversion tests completed successfully!");
 

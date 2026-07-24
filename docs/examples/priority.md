@@ -1,8 +1,8 @@
 # Priority Behaviours
 
-This example demonstrates how to use behaviour priorities to implement a Subsumption Architecture. A high-priority obstacle avoidance behaviour automatically inhibits a low-priority patrol behaviour when a hazard is detected.
+This example demonstrates how to use behaviour priorities to implement a Subsumption Architecture. A high-priority obstacle avoidance behaviour automatically inhibits a low-priority patrol behaviour when a hazard is detected by using `set priority` and `release priority`.
 
-Higher numeric priority values indicate higher precedence (e.g., priority 30 overrides priority 10).
+Higher numeric priority values indicate higher precedence (e.g., priority 30 overrides priority 0).
 
 ## Agent initialization
 
@@ -16,10 +16,10 @@ microspade.onAgentStart("robot", function () {
 
 ## Low-priority behaviour (Patrol)
 
-This cyclic behaviour runs the normal patrol routine with a low priority (10). It displays alternating diamond icons to indicate movement.
+This cyclic behaviour runs the normal patrol routine with default priority (0). It displays alternating diamond icons to indicate movement.
 
 ```blocks
-microspade.addCyclicBehaviour("patrol", 10, function () {
+microspade.addCyclicBehaviour("patrol", function () {
     basic.showIcon(IconNames.SmallDiamond)
     basic.pause(150)
     basic.showIcon(IconNames.Diamond)
@@ -29,15 +29,17 @@ microspade.addCyclicBehaviour("patrol", 10, function () {
 
 ## High-priority behaviour (Obstacle avoidance)
 
-This periodic behaviour runs every 50 ms with a high priority (30). When the light level falls below the threshold (simulating an obstacle sensor), it executes an emergency alert and holds high-priority control. While active, it automatically inhibits the lower-priority patrol behaviour.
+This periodic behaviour runs every 50 ms. When the light level falls below the threshold (simulating an obstacle sensor), it calls `set priority 30` to execute an emergency alert and hold high-priority control. While active, it automatically inhibits the lower-priority patrol behaviour. When the path is clear, it calls `release priority` to restore normal operation.
 
 ```blocks
-microspade.addPeriodicBehaviour("obstacleAvoidance", 50, 30, function () {
+microspade.addPeriodicBehaviour("obstacleAvoidance", 50, function () {
     if (input.lightLevel() < 30) {
+        microspade.setPriority(30)
         obstaculo = true
         basic.showIcon(IconNames.No)
         music.play(music.builtinPlayableSoundEffect(soundExpression.giggle), music.PlaybackMode.UntilDone)
     } else {
+        microspade.releasePriority()
         obstaculo = false
     }
 })
@@ -54,19 +56,21 @@ microspade.onAgentStart("robot", function () {
     obstaculo = false
 })
 
-microspade.addCyclicBehaviour("patrol", 10, function () {
+microspade.addCyclicBehaviour("patrol", function () {
     basic.showIcon(IconNames.SmallDiamond)
     basic.pause(150)
     basic.showIcon(IconNames.Diamond)
     basic.pause(150)
 })
 
-microspade.addPeriodicBehaviour("obstacleAvoidance", 50, 30, function () {
+microspade.addPeriodicBehaviour("obstacleAvoidance", 50, function () {
     if (input.lightLevel() < 30) {
+        microspade.setPriority(30)
         obstaculo = true
         basic.showIcon(IconNames.No)
         music.play(music.builtinPlayableSoundEffect(soundExpression.giggle), music.PlaybackMode.UntilDone)
     } else {
+        microspade.releasePriority()
         obstaculo = false
     }
 })

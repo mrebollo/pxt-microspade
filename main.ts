@@ -102,10 +102,10 @@ namespace microspade {
     const INHIBITION_WINDOW_MS = 200;
 
     /**
-     * Internal helper function that checks whether a behavior with the given priority
-     * is allowed to execute or is currently inhibited by a higher-priority behavior.
+     * Internal helper function that checks whether a behavior is allowed to execute
+     * or is currently inhibited by a higher-priority behavior.
      */
-    function shouldExecute(priority: number): boolean {
+    function shouldExecute(): boolean {
         let now = control.millis();
 
         // 1. If the inhibition window has expired, reset active priority back to base level (0)
@@ -113,31 +113,68 @@ namespace microspade {
             _activePriority = 0;
         }
 
-        // 2. If the current behavior's priority is lower than active priority, it is INHIBITED
-        if (priority < _activePriority) {
-            return false;
+        // 2. If an active priority higher than 0 is set, lower-priority behaviors are INHIBITED
+        return _activePriority === 0;
+    }
+
+    /**
+     * Sets the current execution priority level. When set above 0, lower-priority behaviors are inhibited.
+     */
+    //% block="set priority $priority"
+    //% blockId="microspade_set_priority"
+    //% priority.defl=1
+    //% group="Behaviours"
+    //% weight=85
+    export function setPriority(priority: number): void {
+        let now = control.millis();
+        if (priority <= 0) {
+            _activePriority = 0;
+            return;
         }
 
-        // 3. If equal or higher priority, claim or renew control
-        _activePriority = priority;
-        _lastHighPriorityTime = now;
-        return true;
+        // Prevent priority inversion: accept priority if inhibition window expired
+        // or requested priority is equal or higher than current active priority
+        if (now - _lastHighPriorityTime > INHIBITION_WINDOW_MS || priority >= _activePriority) {
+            _activePriority = priority;
+            _lastHighPriorityTime = now;
+        }
+    }
+
+    /**
+     * Releases the active priority back to default (0), allowing lower-priority behaviors to execute immediately.
+     */
+    //% block="release priority"
+    //% blockId="microspade_release_priority"
+    //% group="Behaviours"
+    //% weight=84
+    export function releasePriority(): void {
+        _activePriority = 0;
+    }
+
+    /**
+     * Gets the currently active execution priority level.
+     */
+    export function getActivePriority(): number {
+        let now = control.millis();
+        if (now - _lastHighPriorityTime > INHIBITION_WINDOW_MS) {
+            _activePriority = 0;
+        }
+        return _activePriority;
     }
 
     /**
      * Executes an action once in the background after the agent starts.
      */
-    //% block="one shot $name||priority $priority"
+    //% block="one shot $name"
     //% blockId="microspade_add_oneshot"
     //% name.defl="task"
-    //% priority.defl=0
     //% group="Behaviours"
     //% weight=70
-    export function addOneShotBehaviour(name: string, priority: number = 0, handler: () => void): void {
+    export function addOneShotBehaviour(name: string, handler: () => void): void {
         if (!handler) return;
 
         control.runInBackground(() => {
-            if (running && shouldExecute(priority)) {
+            if (running && shouldExecute()) {
                 handler();
             }
         });
@@ -146,21 +183,20 @@ namespace microspade {
     /**
      * Executes an action continuously in a loop in the background while the agent is running.
      */
-    //% block="cyclic $name||priority $priority"
+    //% block="cyclic $name"
     //% blockId="microspade_add_cyclic"
     //% name.defl="task"
-    //% priority.defl=0
     //% group="Behaviours"
     //% weight=80
-    export function addCyclicBehaviour(name: string, priority: number = 0, handler: () => void): void {
+    export function addCyclicBehaviour(name: string, handler: () => void): void {
         if (!handler) return;
 
         control.runInBackground(() => {
             while (running) {
-                if (shouldExecute(priority)) {
+                if (shouldExecute()) {
                     handler();
                 }
-                basic.pause(10); // Yield CPU to other fibres
+                basic.pause(20); // Yield CPU to other fibres (50 Hz standard rate)
             }
         });
     }
@@ -168,21 +204,18 @@ namespace microspade {
     /**
      * Executes an action periodically in the background at fixed time intervals.
      */
-    //% block="periodic $name every $periodMs ms||priority $priority"
+    //% block="periodic $name every $periodMs ms"
     //% blockId="microspade_add_periodic"
     //% name.defl="task"
     //% periodMs.defl=1000
-    //% priority.defl=0
     //% group="Behaviours"
     //% weight=75
-    export function addPeriodicBehaviour(name: string, periodMs: number = 1000, priority: number = 0, handler: () => void): void {
+    export function addPeriodicBehaviour(name: string, periodMs: number = 1000, handler: () => void): void {
         if (!handler) return;
 
         control.runInBackground(() => {
             while (running) {
-                if (shouldExecute(priority)) {
-                    handler();
-                }
+                handler();
                 basic.pause(periodMs);
             }
         });
@@ -191,19 +224,18 @@ namespace microspade {
     /**
      * Executes an action once in the background after a specified delay once the agent starts.
      */
-    //% block="timeout $name after $timeoutMs ms||priority $priority"
+    //% block="timeout $name after $timeoutMs ms"
     //% blockId="microspade_add_timeout"
     //% name.defl="task"
     //% timeoutMs.defl=2000
-    //% priority.defl=0
     //% group="Behaviours"
     //% weight=65
-    export function addTimeoutBehaviour(name: string, timeoutMs: number = 2000, priority: number = 0, handler: () => void): void {
+    export function addTimeoutBehaviour(name: string, timeoutMs: number = 2000, handler: () => void): void {
         if (!handler) return;
 
         control.runInBackground(() => {
             basic.pause(timeoutMs);
-            if (running && shouldExecute(priority)) {
+            if (running && shouldExecute()) {
                 handler();
             }
         });
