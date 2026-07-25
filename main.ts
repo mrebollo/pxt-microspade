@@ -115,7 +115,7 @@ namespace microspade {
         control.runInBackground(() => {
             while (running) {
                 handler();
-                basic.pause(10); // Yield CPU to other fibres
+                basic.pause(20); // Yield CPU to other fibres
             }
         });
     }
@@ -129,7 +129,7 @@ namespace microspade {
     //% periodMs.defl=1000
     //% group="Behaviours"
     //% weight=75
-    export function addPeriodicBehaviour(name: string, periodMs: number, handler: () => void): void {
+    export function addPeriodicBehaviour(name: string, periodMs: number = 1000, handler: () => void): void {
         if (!handler) return;
 
         control.runInBackground(() => {
@@ -149,7 +149,7 @@ namespace microspade {
     //% timeoutMs.defl=2000
     //% group="Behaviours"
     //% weight=65
-    export function addTimeoutBehaviour(name: string, timeoutMs: number, handler: () => void): void {
+    export function addTimeoutBehaviour(name: string, timeoutMs: number = 2000, handler: () => void): void {
         if (!handler) return;
 
         control.runInBackground(() => {
