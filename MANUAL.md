@@ -109,7 +109,7 @@ This agent listens continuously in the background and displays any temperature m
 
 Drag the "on agent start" block and name it "cli". Drag the "on message received" event block.
 
-Inside the event, add a "show string" block and display the temperature by extracting the "body" field of the received message:
+Inside the event, add a "show number" block and display the temperature by extracting the body using getMessageBodyNumber:
 
 ```code
 microspade.onAgentStart("cli", function () {
@@ -117,8 +117,8 @@ microspade.onAgentStart("cli", function () {
 })
 
 microspade.onMessageReceived(function (message) {
-    let bodyText = microspade.getMessageField(message, microspade.MessageField.Body)
-    basic.showString(bodyText)
+    let tempValue = microspade.getMessageBodyNumber(message)
+    basic.showNumber(tempValue)
 })
 ```
 

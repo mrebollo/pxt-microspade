@@ -38,6 +38,8 @@ microspade.createMessage("agent", "body")
 microspade.onMessageReceived((message) => {})
 microspade.makeReply(null, "body")
 microspade.getMessageField(null, microspade.MessageField.Body)
+microspade.getMessagePerformative(null)
+microspade.performative(microspade.MessagePerformative.Inform)
 microspade.sendMessage(null)
 microspade.receive()
 ```

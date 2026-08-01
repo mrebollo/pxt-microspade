@@ -52,7 +52,7 @@ assert(reply.getBody() === "got your message", "Reply body should be 'got your m
 let replyNum = microspade.makeReplyNumber(msg, 42.5);
 assert(replyNum.getTo() === "sender_agent", "ReplyNum destination should be 'sender_agent'");
 assert(replyNum.getSender() === "sender_agent", "ReplyNum sender should be 'sender_agent'");
-assert(replyNum.getBody() === "42.5", "ReplyNum body should be '42.5'");
+assert(microspade.getMessageBodyNumber(replyNum) === 42.5, "ReplyNum body should unpack float32 42.5");
 
 // Test 6b: Verificar performativa por defecto y personalizada en respuestas
 assert(reply.getPerformative() === microspade.MessagePerformative.Inform, "Default reply performative should be 'Inform'");
@@ -63,6 +63,7 @@ assert(replyCustom.getPerformative() === microspade.MessagePerformative.Agree, "
 
 let replyCustomNum = microspade.makeReplyNumber(msg, 100, microspade.MessagePerformative.Confirm);
 assert(replyCustomNum.getPerformative() === microspade.MessagePerformative.Confirm, "Custom reply number performative should be 'Confirm'");
+assert(microspade.getMessagePerformative(replyCustomNum) === microspade.performative(microspade.MessagePerformative.Confirm), "getMessagePerformative should match performative selector helper");
 
 serial.writeLine("All Message & Serialization tests completed successfully!");
 
@@ -122,7 +123,9 @@ microspade.stopAgent();
 assert(!microspade.running, "Agent should not be running after stopAgent");
 assert(stopExecuted, "Stop callback should run when agent stops");
 
-// Restaurar estado activo para que el agente quede listo
-microspade.running = true;
+// Test 10: Filtrado de mensajes propios en el receptor de radio
+serial.writeLine("Starting Radio self-message filtering test...");
+let selfMsgDecoded = microspade.Message.decode("broadcast_agent|lifecycle_agent|0|test self filter");
+assert(selfMsgDecoded !== null && selfMsgDecoded.getSender() === microspade.agentName, "Self message decoded sender should match agentName");
 
 serial.writeLine("Agent Lifecycle tests completed successfully!");

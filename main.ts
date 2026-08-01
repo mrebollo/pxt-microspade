@@ -19,6 +19,7 @@ namespace microspade {
             if (!running) return;
             let msg = Message.decode(receivedString);
             if (msg) {
+                if (msg.getSender() === agentName) return; // Ignore self-sent messages
                 if (msg.getTo() === agentName || msg.getTo() === "*") {
                     if (messageReceivedHandler) {
                         control.runInBackground(() => {
@@ -317,8 +318,43 @@ namespace microspade {
     //% inlineInputMode=inline
     //% group="Messages"
     //% weight=58
+    // OPTION B MIGRATION NOTE:
+    // To switch from string transmission to full 4-byte buffer payload:
+    // 1. Change Message.encode() to return Buffer (pins.createBuffer) with packed fields.
+    // 2. Change Message.decode(buf: Buffer) to unpack fields directly from binary format.
+    // 3. Replace radio.sendString(...) with radio.sendBuffer(...) in sendMessage().
+    // 4. Replace radio.onReceivedString(...) with radio.onReceivedBuffer(...) in initRadio().
+
+    function packFloat32(num: number): string {
+        let buf = pins.createBuffer(4);
+        buf.setNumber(NumberFormat.Float32LE, 0, num);
+        return buf.toString();
+    }
+
+    function unpackFloat32(str: string): number {
+        if (!str) return 0;
+        let buf = control.createBufferFromUTF8(str);
+        if (buf.length >= 4) {
+            return buf.getNumber(NumberFormat.Float32LE, 0);
+        }
+        let num = parseFloat(str);
+        return isNaN(num) ? 0 : num;
+    }
+
+    /**
+     * Creates a structured message with a numeric body.
+     */
+    //% block="create message to $to body number $body || performative $performative"
+    //% blockId="microspade_create_message_number"
+    //% to.defl="agent"
+    //% body.defl=0
+    //% performative.defl=MessagePerformative.Inform
+    //% expandableArgumentMode="toggle"
+    //% inlineInputMode=inline
+    //% group="Messages"
+    //% weight=58
     export function createMessageNumber(to: string, body: number, performative: MessagePerformative = MessagePerformative.Inform): Message {
-        return new Message(to, agentName, performative, "" + body);
+        return new Message(to, agentName, performative, packFloat32(body));
     }
 
     /**
@@ -350,7 +386,30 @@ namespace microspade {
         // The destination is the original sender, and the sender is the current agent
         let to = message.getField(MessageField.Sender);
         let sender = agentName;
-        return new Message(to, sender, performative, "" + replyBody);
+        return new Message(to, sender, performative, packFloat32(replyBody));
+    }
+
+    /**
+     * Gets a performative value for comparison or filtering.
+     */
+    //% block="$performative"
+    //% blockId="microspade_performative"
+    //% group="Messages"
+    //% weight=30
+    export function performative(performative: MessagePerformative): MessagePerformative {
+        return performative;
+    }
+
+    /**
+     * Gets the performative of a message.
+     */
+    //% block="get performative of $message"
+    //% blockId="microspade_message_get_performative"
+    //% group="Messages"
+    //% weight=46
+    export function getMessagePerformative(message: Message): MessagePerformative {
+        if (!message) return MessagePerformative.Inform;
+        return message.getPerformative();
     }
 
     /**
@@ -374,10 +433,7 @@ namespace microspade {
     //% weight=44
     export function getMessageBodyNumber(message: Message): number {
         if (!message) return 0;
-        let body = message.getField(MessageField.Body);
-        if (!body) return 0;
-        let num = parseFloat(body);
-        return isNaN(num) ? 0 : num;
+        return unpackFloat32(message.getField(MessageField.Body));
     }
 
     /**
