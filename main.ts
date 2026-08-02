@@ -172,6 +172,7 @@ namespace microspade {
         Body
     }
 
+    //% enumIdentity="microspade.MessagePerformative"
     export enum MessagePerformative {
         //% block="inform"
         Inform = 0,
