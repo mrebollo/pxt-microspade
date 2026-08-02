@@ -1,7 +1,7 @@
 {
     "name": "pxt-microspade",
-    "version": "0.5.3",
-    "description": "Agentes inteligentes ligeros para BBC micro:bit basados en agantes SPADE",
+    "version": "0.5.4",
+    "description": "Lightweight Intelligent Agents for BBC micro:bit based on SPADE",
     "dependencies": {
         "core": "*",
         "radio": "*",

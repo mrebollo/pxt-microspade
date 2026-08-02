@@ -11,16 +11,29 @@ namespace microspade {
     let messageReceivedHandler: (message: Message) => void = null;
     let _radioInitialized = false;
 
+    const BROADCAST_ID = 255;
+
+    function nameToId(name: string): number {
+        if (!name || name === "*") return BROADCAST_ID;
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = (hash * 31 + name.charCodeAt(i)) & 0xFF;
+        }
+        return hash === BROADCAST_ID ? 254 : hash;
+    }
+
     // Lazy initialization of the radio module
     function initRadio(): void {
         if (_radioInitialized) return;
         _radioInitialized = true;
-        radio.onReceivedString(function (receivedString) {
-            if (!running) return;
-            let msg = Message.decode(receivedString);
+        radio.onReceivedBuffer(function (buf) {
+            if (!running || !buf) return;
+            let msg = Message.decodeBuffer(buf);
             if (msg) {
-                if (msg.getSender() === agentName) return; // Ignore self-sent messages
-                if (msg.getTo() === agentName || msg.getTo() === "*") {
+                let myId = nameToId(agentName);
+                if (nameToId(msg.getSender()) === myId) return; // Ignore self-sent messages
+                let toId = nameToId(msg.getTo());
+                if (toId === myId || toId === BROADCAST_ID) {
                     if (messageReceivedHandler) {
                         control.runInBackground(() => {
                             messageReceivedHandler(msg);
@@ -225,11 +238,14 @@ namespace microspade {
         public performative: MessagePerformative;
         public body: string;
 
-        constructor(to: string, sender: string, performative: MessagePerformative, body: string) {
+        public isNumber: boolean;
+
+        constructor(to: string, sender: string, performative: MessagePerformative, body: string, isNumber: boolean = false) {
             this.to = to;
             this.sender = sender;
             this.performative = performative;
             this.body = body;
+            this.isNumber = isNumber;
         }
 
         public getField(field: MessageField): string {
@@ -259,38 +275,57 @@ namespace microspade {
         }
 
         /**
-         * Encodes the message into a string for radio transmission.
+         * Encodes the message into a compact binary Buffer.
+         * Header: [ToID (1B), SenderID (1B), Performative (1B), IsNumber (1B)]
          */
-        public encode(): string {
-            let bodyEncoded = this.body ? this.body.split("|").join("\\|") : "";
-            // Send the performative index (0-7) to save radio payload space (max 19 chars on v1/simulator)
-            let perfStr = "" + this.performative;
-            return (this.to || "") + "|" + (this.sender || "") + "|" + perfStr + "|" + bodyEncoded;
+        public encodeBuffer(): Buffer {
+            let bodyBuf = this.isNumber ? pins.createBuffer(4) : control.createBufferFromUTF8(this.body || "");
+            if (this.isNumber) {
+                bodyBuf.setNumber(NumberFormat.Float32LE, 0, parseFloat(this.body) || 0);
+            }
+
+            let buf = pins.createBuffer(4 + bodyBuf.length);
+            buf.setNumber(NumberFormat.UInt8LE, 0, nameToId(this.to));
+            buf.setNumber(NumberFormat.UInt8LE, 1, nameToId(this.sender));
+            buf.setNumber(NumberFormat.UInt8LE, 2, (this.performative >= 0 && this.performative <= 7) ? this.performative : 0);
+            buf.setNumber(NumberFormat.UInt8LE, 3, this.isNumber ? 1 : 0);
+            buf.write(4, bodyBuf);
+            return buf;
         }
 
         /**
-         * Decodes a string received via radio into a Message object.
+         * Decodes a binary Buffer into a Message object.
          */
+        public static decodeBuffer(buf: Buffer): Message {
+            if (!buf || buf.length < 4) return null;
+
+            let toId = buf.getNumber(NumberFormat.UInt8LE, 0);
+            let senderId = buf.getNumber(NumberFormat.UInt8LE, 1);
+            let perf = buf.getNumber(NumberFormat.UInt8LE, 2);
+            let isNum = buf.getNumber(NumberFormat.UInt8LE, 3) === 1;
+
+            let to = (toId === BROADCAST_ID) ? "*" : "agent_" + toId;
+            let sender = "agent_" + senderId;
+
+            let body = "";
+            if (isNum && buf.length >= 8) {
+                let val = buf.getNumber(NumberFormat.Float32LE, 4);
+                body = "" + val;
+            } else if (!isNum) {
+                let bodyBuf = buf.slice(4);
+                body = bodyBuf.toString();
+            }
+
+            return new Message(to, sender, perf, body, isNum);
+        }
+
+        // Legacy string methods for backward compatibility
+        public encode(): string {
+            return this.encodeBuffer().toString();
+        }
+
         public static decode(raw: string): Message {
-            if (!raw) return null;
-            let idx1 = raw.indexOf("|");
-            if (idx1 < 0) return null;
-            let idx2 = raw.indexOf("|", idx1 + 1);
-            if (idx2 < 0) return null;
-            let idx3 = raw.indexOf("|", idx2 + 1);
-            if (idx3 < 0) return null;
-
-            let to = raw.substr(0, idx1);
-            let sender = raw.substr(idx1 + 1, idx2 - idx1 - 1);
-            let performativeStr = raw.substr(idx2 + 1, idx3 - idx2 - 1);
-            let bodyEncoded = raw.substr(idx3 + 1);
-            let body = bodyEncoded.split("\\|").join("|");
-
-            // Convert the performative index character back to its numeric value
-            let perfCode = performativeStr.charCodeAt(0) - 48; // '0' is 48 in ASCII
-            let performative = (perfCode >= 0 && perfCode <= 7) ? perfCode : MessagePerformative.Inform;
-
-            return new Message(to, sender, performative, body);
+            return Message.decodeBuffer(control.createBufferFromUTF8(raw));
         }
     }
 
@@ -304,42 +339,7 @@ namespace microspade {
     //% group="Messages"
     //% weight=60
     export function createMessage(to: string, body: string, performative: MessagePerformative = MessagePerformative.Inform): Message {
-        return new Message(to, agentName, performative, body);
-    }
-
-    /**
-     * Creates a structured message with a numeric body.
-     */
-    //% block="create message to $to body number $body || performative $performative"
-    //% blockId="microspade_create_message_number"
-    //% to.defl="agent"
-    //% body.defl=0
-    //% performative.defl=MessagePerformative.Inform
-    //% expandableArgumentMode="toggle"
-    //% inlineInputMode=inline
-    //% group="Messages"
-    //% weight=58
-    // OPTION B MIGRATION NOTE:
-    // To switch from string transmission to full 4-byte buffer payload:
-    // 1. Change Message.encode() to return Buffer (pins.createBuffer) with packed fields.
-    // 2. Change Message.decode(buf: Buffer) to unpack fields directly from binary format.
-    // 3. Replace radio.sendString(...) with radio.sendBuffer(...) in sendMessage().
-    // 4. Replace radio.onReceivedString(...) with radio.onReceivedBuffer(...) in initRadio().
-
-    function packFloat32(num: number): string {
-        let buf = pins.createBuffer(4);
-        buf.setNumber(NumberFormat.Float32LE, 0, num);
-        return buf.toString();
-    }
-
-    function unpackFloat32(str: string): number {
-        if (!str) return 0;
-        let buf = control.createBufferFromUTF8(str);
-        if (buf.length >= 4) {
-            return buf.getNumber(NumberFormat.Float32LE, 0);
-        }
-        let num = parseFloat(str);
-        return isNaN(num) ? 0 : num;
+        return new Message(to, agentName, performative, body, false);
     }
 
     /**
@@ -355,7 +355,7 @@ namespace microspade {
     //% group="Messages"
     //% weight=58
     export function createMessageNumber(to: string, body: number, performative: MessagePerformative = MessagePerformative.Inform): Message {
-        return new Message(to, agentName, performative, packFloat32(body));
+        return new Message(to, agentName, performative, "" + body, true);
     }
 
     /**
@@ -367,11 +367,7 @@ namespace microspade {
     //% group="Messages"
     //% weight=35
     export function makeReply(message: Message, replyBody: string, performative: MessagePerformative = MessagePerformative.Inform): Message {
-        if (!message) return null;
-        // The destination is the original sender, and the sender is the current agent
-        let to = message.getField(MessageField.Sender);
-        let sender = agentName;
-        return new Message(to, sender, performative, replyBody);
+        return message ? createMessage(message.getField(MessageField.Sender), replyBody, performative) : null;
     }
 
     /**
@@ -383,11 +379,7 @@ namespace microspade {
     //% group="Messages"
     //% weight=34
     export function makeReplyNumber(message: Message, replyBody: number, performative: MessagePerformative = MessagePerformative.Inform): Message {
-        if (!message) return null;
-        // The destination is the original sender, and the sender is the current agent
-        let to = message.getField(MessageField.Sender);
-        let sender = agentName;
-        return new Message(to, sender, performative, packFloat32(replyBody));
+        return message ? createMessageNumber(message.getField(MessageField.Sender), replyBody, performative) : null;
     }
 
     /**
@@ -434,7 +426,8 @@ namespace microspade {
     //% weight=44
     export function getMessageBodyNumber(message: Message): number {
         if (!message) return 0;
-        return unpackFloat32(message.getField(MessageField.Body));
+        let num = parseFloat(message.getField(MessageField.Body));
+        return isNaN(num) ? 0 : num;
     }
 
     /**
@@ -464,7 +457,7 @@ namespace microspade {
     }
 
     /**
-     * Sends a message via radio.
+     * Sends a message via radio using compact binary buffer.
      */
     //% block="send message $msg"
     //% blockId="microspade_send_message"
@@ -473,7 +466,7 @@ namespace microspade {
     export function sendMessage(msg: Message): void {
         if (!msg) return;
         initRadio();
-        radio.sendString(msg.encode());
+        radio.sendBuffer(msg.encodeBuffer());
     }
 
     /**

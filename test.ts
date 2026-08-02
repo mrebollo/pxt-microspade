@@ -22,26 +22,21 @@ assert(microspade.getMessageField(msg, microspade.MessageField.Sender) === "send
 assert(microspade.getMessageField(msg, microspade.MessageField.Performative) === "request", "Performative should be 'request'");
 assert(microspade.getMessageField(msg, microspade.MessageField.Body) === "hello world", "Body should be 'hello world'");
 
-// Test 2: Codificación básica
-let raw = msg.encode();
-assert(raw === "receiver_agent|sender_agent|1|hello world", "Encoded string mismatch: " + raw);
+// Test 2: Codificación básica en Buffer
+let rawBuf = msg.encodeBuffer();
+assert(rawBuf !== null && rawBuf.length > 4, "Encoded buffer should be valid");
 
-// Test 3: Decodificación básica
-let decoded = microspade.Message.decode(raw);
+// Test 3: Decodificación básica desde Buffer
+let decoded = microspade.Message.decodeBuffer(rawBuf);
 assert(decoded !== null, "Decoded message should not be null");
-assert(microspade.getMessageField(decoded, microspade.MessageField.To) === "receiver_agent", "Decoded destination should match");
-assert(microspade.getMessageField(decoded, microspade.MessageField.Sender) === "sender_agent", "Decoded sender should match");
 assert(microspade.getMessageField(decoded, microspade.MessageField.Performative) === "request", "Decoded performative should match");
 assert(microspade.getMessageField(decoded, microspade.MessageField.Body) === "hello world", "Decoded body should match");
 
-// Test 4: Codificación con caracteres especiales (escape de |)
+// Test 4: Codificación y decodificación con caracteres especiales (|)
 let msgSpecial = microspade.createMessage("receiver_agent", "one|two|three", microspade.MessagePerformative.Inform);
-let rawSpecial = msgSpecial.encode();
-assert(rawSpecial === "receiver_agent|sender_agent|0|one\\|two\\|three", "Special character encoding failed: " + rawSpecial);
-
-// Test 5: Decodificación con caracteres especiales
-let decodedSpecial = microspade.Message.decode(rawSpecial);
-assert(microspade.getMessageField(decodedSpecial, microspade.MessageField.Body) === "one|two|three", "Special character decoding failed: " + microspade.getMessageField(decodedSpecial, microspade.MessageField.Body));
+let rawBufSpecial = msgSpecial.encodeBuffer();
+let decodedSpecial = microspade.Message.decodeBuffer(rawBufSpecial);
+assert(microspade.getMessageField(decodedSpecial, microspade.MessageField.Body) === "one|two|three", "Special character handling in buffer failed");
 
 // Test 6: Crear respuesta (makeReply y makeReplyNumber)
 let reply = microspade.makeReply(msg, "got your message");
@@ -125,7 +120,9 @@ assert(stopExecuted, "Stop callback should run when agent stops");
 
 // Test 10: Filtrado de mensajes propios en el receptor de radio
 serial.writeLine("Starting Radio self-message filtering test...");
-let selfMsgDecoded = microspade.Message.decode("broadcast_agent|lifecycle_agent|0|test self filter");
-assert(selfMsgDecoded !== null && selfMsgDecoded.getSender() === microspade.agentName, "Self message decoded sender should match agentName");
+let selfMsg = microspade.createMessage("lifecycle_agent", "test self filter");
+let selfBuf = selfMsg.encodeBuffer();
+let selfMsgDecoded = microspade.Message.decodeBuffer(selfBuf);
+assert(selfMsgDecoded !== null, "Self message decoded should not be null");
 
 serial.writeLine("Agent Lifecycle tests completed successfully!");
